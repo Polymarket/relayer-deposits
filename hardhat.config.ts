@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
-import { ChainId, getRemoteNetworkConfig, mnemonic } from "./config";
+import { ChainId, getRemoteNetworkConfig, mnemonic, infuraApiKey } from "./config";
 import "./tasks";
 
 import "hardhat-deploy";
@@ -27,6 +27,10 @@ const config: HardhatUserConfig = {
         hardhat: {
             chainId: ChainId.hardhat,
             saveDeployments: false,
+            forking: {
+                url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
+                blockNumber: 12698288,
+            }
         },
         goerli: { accounts, ...getRemoteNetworkConfig("goerli") },
         kovan: { accounts, ...getRemoteNetworkConfig("kovan") },
@@ -40,12 +44,12 @@ const config: HardhatUserConfig = {
         tests: "./test",
     },
     solidity: {
-        version: "0.8.0",
+        version: "0.8.4",
         settings: {
             // https://hardhat.org/hardhat-network/#solidity-optimizer-support
             optimizer: {
                 enabled: true,
-                runs: 200,
+                runs: 1000,
             },
         },
     },
