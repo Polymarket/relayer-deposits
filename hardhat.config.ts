@@ -28,8 +28,7 @@ const config: HardhatUserConfig = {
             chainId: ChainId.hardhat,
             saveDeployments: false,
             forking: {
-                url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
-                blockNumber: 12698288,
+                url: `https://mainnet.infura.io/v3/${infuraApiKey}`
             }
         },
         goerli: { accounts, ...getRemoteNetworkConfig("goerli") },

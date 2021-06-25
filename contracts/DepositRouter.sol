@@ -5,18 +5,18 @@ pragma solidity 0.8.4;
 import "./interfaces/IPermitToken.sol";
 import "./interfaces/IRootChainManager.sol";
 
-contract Greeter {
+contract DepositRouter {
     IRootChainManager public rootChainManager;
     IPermitToken public rootToken;
     address public predicateContract;
 
     constructor(
-        IRootChainManager _rootChainManager,
         IPermitToken _rootToken,
+        IRootChainManager _rootChainManager,
         address _predicateContract
     ) {
-        rootChainManager = _rootChainManager;
         rootToken = _rootToken;
+        rootChainManager = _rootChainManager;
         predicateContract = _predicateContract;
     }
 
