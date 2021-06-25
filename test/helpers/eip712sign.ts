@@ -7,46 +7,50 @@ type PermitParams = {
     contractVersion: string;
     chainId: number;
     verifyingContract: string;
-    spender: string;
+    to: string;
     value: BigNumber;
-    nonce: BigNumber;
-    deadline: number;
+    nonce: string;
+    validAfter: number;
+    validBefore: number;
 }
 
-export const getPermitSignature = async ({
+export const getReceiveSignature = async ({
     signer,
     tokenName,
     contractVersion,
     chainId,
     verifyingContract,
-    spender,
+    to,
     value,
     nonce,
-    deadline
+    validAfter,
+    validBefore,
 }: PermitParams): Promise<{ v: number; r: string; s: string }> => {
     const domain = {
         name: tokenName,
         version: contractVersion,
-        chainId,
+        chainId: BigNumber.from(chainId).toHexString(),
         verifyingContract,
     };
 
     const types = {
-        Permit: [
-            { name: "owner", type: "address" },
-            { name: "spender", type: "address" },
+        ReceiveWithAuthorization: [
+            { name: "from", type: "address" },
+            { name: "to", type: "address" },
             { name: "value", type: "uint256" },
-            { name: "nonce", type: "uint256" },
-            { name: "deadline", type: "uint256" },
+            { name: "validAfter", type: "uint256" },
+            { name: "validBefore", type: "uint256" },
+            { name: "nonce", type: "bytes32" },
         ]
     };
 
     const eip712Value = {
-        owner: signer.address,
-        spender,
+        from: signer.address,
+        to,
         value,
+        validAfter,
+        validBefore,
         nonce,
-        deadline
     };
 
     const signature = await signer._signTypedData(domain, types, eip712Value);

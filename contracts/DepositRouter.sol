@@ -2,44 +2,51 @@
 
 pragma solidity 0.8.4;
 
-import "./interfaces/IPermitToken.sol";
+import "./interfaces/IERC20EIP3009.sol";
 import "./interfaces/IRootChainManager.sol";
 
 contract DepositRouter {
     IRootChainManager public rootChainManager;
-    IPermitToken public rootToken;
+    IERC20EIP3009 public rootToken;
     address public predicateContract;
 
     constructor(
-        IPermitToken _rootToken,
+        IERC20EIP3009 _rootToken,
         IRootChainManager _rootChainManager,
         address _predicateContract
     ) {
         rootToken = _rootToken;
         rootChainManager = _rootChainManager;
         predicateContract = _predicateContract;
+
+        // hit predicateContract with that max approval
+        rootToken.approve(predicateContract, type(uint).max);
     }
 
-    function permitAndDeposit(
-        address owner,
+    function deposit(
+        address from,
+        address depositRecipient,
         uint256 value,
-        uint256 deadline,
+        uint256 validBefore,
+        bytes32 nonce,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external {
-        rootToken.permit(
-            owner,
-            predicateContract,
+        rootToken.receiveWithAuthorization(
+            from,
+            address(this),
             value,
-            deadline,
+            0,
+            validBefore,
+            nonce,
             v,
             r,
             s
         );
 
         rootChainManager.depositFor(
-            owner,
+            depositRecipient,
             address(rootToken),
             abi.encode(value)
         );

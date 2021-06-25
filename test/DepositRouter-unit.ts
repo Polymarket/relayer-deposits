@@ -5,21 +5,21 @@ import { deployments, ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
-import { DepositRouter, TestERC20Permit } from "../typechain";
-import { deploy, deployMock, getPermitSignature } from "./helpers";
+import { DepositRouter, TestToken } from "../typechain";
+import { deploy, deployMock, getReceiveSignature } from "./helpers";
 
 const setup = deployments.createFixture(async () => {
 
     const admin = await ethers.getNamedSigner("admin");
 
     const tokenName = "testToken";
+    const tokenVersion = "1";
 
-    const permitToken = await deploy<TestERC20Permit>("TestERC20Permit", {
-        args: [tokenName, "TST"],
+    const testToken = await deploy<TestToken>("TestToken", {
+        from: admin.address,
+        args: [tokenName, tokenVersion, "TST", 18, ethers.constants.WeiPerEther.mul(10000)],
         connect: admin,
     })
-
-    await permitToken.mint(admin.address, ethers.constants.WeiPerEther.mul(1000));
 
     const rootChainManagerMock = await deployMock("IRootChainManager");
 
@@ -28,61 +28,74 @@ const setup = deployments.createFixture(async () => {
     const predicateContract = ethers.Wallet.createRandom().address
 
     const router = await deploy<DepositRouter>("DepositRouter", {
-        args: [permitToken.address, rootChainManagerMock.address, predicateContract],
+        args: [testToken.address, rootChainManagerMock.address, predicateContract],
         connect: admin,
     });
 
     return {
         router,
-        permitToken,
+        testToken,
         admin,
         tokenName,
         predicateContract,
+        tokenVersion,
     };
 });
 
 describe("Unit tests", function () {
     describe("DepositRouter", function () {
         let router: DepositRouter;
-        let permitToken: TestERC20Permit;
+        let testToken: TestToken;
         let admin: SignerWithAddress;
         let tokenName: string;
         let predicateContract: string;
+        let tokenVersion: string;
 
         beforeEach(async function () {
             const deployment = await setup();
             router = deployment.router;
-            permitToken = deployment.permitToken;
+            testToken = deployment.testToken;
             admin = deployment.admin;
             tokenName = deployment.tokenName;
             predicateContract = deployment.predicateContract;
+            tokenVersion = deployment.tokenVersion;
         });
 
-        it("should permit predicate", async function () {
-            const deadline = Math.floor(Date.now() / 1000 + 3600);
+        it("deposit router has approved the predicate contract max uint256", async function () {
+            const allowance = await testToken.allowance(router.address, predicateContract)
+            expect(allowance.toString()).to.equal(ethers.constants.MaxUint256.toString());
+        })
 
-            const permitValue = ethers.constants.WeiPerEther;
+        it("should transfer tokens to the deposit contract", async function () {
+            const validBefore = Math.floor(Date.now() / 1000 + 3600);
 
-            const { v, r, s } = await getPermitSignature({
+            const depositAmount = ethers.constants.WeiPerEther;
+
+            const nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+
+            const { v, r, s } = await getReceiveSignature({
                 signer: admin,
                 tokenName,
-                contractVersion: "1",
+                contractVersion: tokenVersion,
                 chainId: 31337,
-                verifyingContract: permitToken.address,
-                spender: predicateContract,
-                value: permitValue,
-                nonce: await permitToken.nonces(admin.address),
-                deadline: deadline,
-            })
+                verifyingContract: testToken.address,
+                to: router.address,
+                value: depositAmount,
+                nonce,
+                validBefore,
+                validAfter: 0,
+            });
 
-            await expect(router.permitAndDeposit(
+            expect (await router.deposit(
                 admin.address,
-                permitValue,
-                deadline,
+                admin.address,
+                depositAmount,
+                validBefore,
+                nonce,
                 v,
                 r,
                 s
-            )).to.emit(permitToken, "Approval").withArgs(admin.address, predicateContract, permitValue);
+            )).to.emit(testToken, "Transfer").withArgs(admin.address, router.address, depositAmount);
         });
     });
 });

@@ -28,6 +28,7 @@ export const fundAccountETH = async (account: string, amount: BigNumber): Promis
     );
 }
 
+// buy USDC on uniswap v2
 export const fundAccountUSDC = async (account: SignerWithAddress, sellAmount: BigNumber, usdc: string): Promise<void> => {
     const uniRouter = new Contract(
         UNISWAP_V2_ROUTER_02,
@@ -37,7 +38,5 @@ export const fundAccountUSDC = async (account: SignerWithAddress, sellAmount: Bi
 
     const path = [WETH_ADDRESS, usdc];
 
-    console.log("before swap");
     await uniRouter.swapExactETHForTokens(1, path, account.address, constants.MaxUint256, { value: sellAmount });
-    console.log("after swap");
 }

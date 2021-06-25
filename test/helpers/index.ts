@@ -1,3 +1,3 @@
 export * from "./fundAccount";
 export * from "./deploy";
-export * from "./permit";
+export * from "./eip712sign";

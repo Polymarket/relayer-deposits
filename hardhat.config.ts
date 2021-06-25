@@ -43,14 +43,21 @@ const config: HardhatUserConfig = {
         tests: "./test",
     },
     solidity: {
-        version: "0.8.4",
-        settings: {
-            // https://hardhat.org/hardhat-network/#solidity-optimizer-support
-            optimizer: {
-                enabled: true,
-                runs: 1000,
+        compilers: [
+            {
+                version: "0.8.4",
+                settings: {
+                    // https://hardhat.org/hardhat-network/#solidity-optimizer-support
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                },
             },
-        },
+            {
+                version: "0.6.12",
+            }
+        ]
     },
     typechain: {
         outDir: "typechain",
