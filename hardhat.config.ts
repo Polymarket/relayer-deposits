@@ -31,10 +31,8 @@ const config: HardhatUserConfig = {
                 url: `https://mainnet.infura.io/v3/${infuraApiKey}`
             }
         },
-        goerli: { accounts, ...getRemoteNetworkConfig("goerli") },
-        kovan: { accounts, ...getRemoteNetworkConfig("kovan") },
-        rinkeby: { accounts, ...getRemoteNetworkConfig("rinkeby") },
-        ropsten: { accounts, ...getRemoteNetworkConfig("ropsten") },
+        // biconomy doesn't run on goerli so not point deploying to other networks
+        mainnet: { accounts, ...getRemoteNetworkConfig("mainnet") },
     },
     paths: {
         artifacts: "./artifacts",

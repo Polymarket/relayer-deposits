@@ -1,0 +1,208 @@
+{
+  "address": "0xE586475eaF2576E24d0C9E3Fb753d1C218d9a72C",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20EIP3009",
+          "name": "_rootToken",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IRootChainManager",
+          "name": "_rootChainManager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_predicateContract",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "depositRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "validBefore",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "predicateContract",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rootChainManager",
+      "outputs": [
+        {
+          "internalType": "contract IRootChainManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rootToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20EIP3009",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x662d55dc4956b3fa61a1db1355d30683da16d518fe267971b26f8ef5d807b0f1",
+  "receipt": {
+    "to": null,
+    "from": "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3",
+    "contractAddress": "0xE586475eaF2576E24d0C9E3Fb753d1C218d9a72C",
+    "transactionIndex": 31,
+    "gasUsed": "350611",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000200000000000000000000008000000000000000000000000000000000000000000000000000000000400000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000024000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000010000000000000000000000000000000000000000000000000000000010000",
+    "blockHash": "0x8a139bd048590f569e573a9ad9962af310ea801d8effe26f5f3b5feab6aea7aa",
+    "transactionHash": "0x662d55dc4956b3fa61a1db1355d30683da16d518fe267971b26f8ef5d807b0f1",
+    "logs": [
+      {
+        "transactionIndex": 31,
+        "blockNumber": 12723149,
+        "transactionHash": "0x662d55dc4956b3fa61a1db1355d30683da16d518fe267971b26f8ef5d807b0f1",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "topics": [
+          "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+          "0x000000000000000000000000e586475eaf2576e24d0c9e3fb753d1c218d9a72c",
+          "0x00000000000000000000000040ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"
+        ],
+        "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "logIndex": 56,
+        "blockHash": "0x8a139bd048590f569e573a9ad9962af310ea801d8effe26f5f3b5feab6aea7aa"
+      }
+    ],
+    "blockNumber": 12723149,
+    "cumulativeGasUsed": "3730813",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "0xA0c68C638235ee32657e8f720a23ceC1bFc77C77",
+    "0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf"
+  ],
+  "solcInputHash": "cd8e8dfc5d8737c0461e393c9ec2bb42",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.4+commit.c7e474f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IERC20EIP3009\",\"name\":\"_rootToken\",\"type\":\"address\"},{\"internalType\":\"contract IRootChainManager\",\"name\":\"_rootChainManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_predicateContract\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"depositRecipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"validBefore\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"nonce\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"predicateContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rootChainManager\",\"outputs\":[{\"internalType\":\"contract IRootChainManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rootToken\",\"outputs\":[{\"internalType\":\"contract IERC20EIP3009\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/DepositRouter.sol\":\"DepositRouter\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"contracts/DepositRouter.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.4;\\n\\nimport \\\"./interfaces/IERC20EIP3009.sol\\\";\\nimport \\\"./interfaces/IRootChainManager.sol\\\";\\n\\ncontract DepositRouter {\\n    IRootChainManager public rootChainManager;\\n    IERC20EIP3009 public rootToken;\\n    address public predicateContract;\\n\\n    constructor(\\n        IERC20EIP3009 _rootToken,\\n        IRootChainManager _rootChainManager,\\n        address _predicateContract\\n    ) {\\n        rootToken = _rootToken;\\n        rootChainManager = _rootChainManager;\\n        predicateContract = _predicateContract;\\n\\n        // hit predicateContract with that max approval\\n        rootToken.approve(predicateContract, type(uint).max);\\n    }\\n\\n    function deposit(\\n        address from,\\n        address depositRecipient,\\n        uint256 value,\\n        uint256 validBefore,\\n        bytes32 nonce,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) external {\\n        rootToken.receiveWithAuthorization(\\n            from,\\n            address(this),\\n            value,\\n            0,\\n            validBefore,\\n            nonce,\\n            v,\\n            r,\\n            s\\n        );\\n\\n        rootChainManager.depositFor(\\n            depositRecipient,\\n            address(rootToken),\\n            abi.encode(value)\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0xcedc38bfaabeda17373cefdf36dffb021bae54e5df5c70a495bd6311fba5716a\",\"license\":\"MIT\"},\"contracts/interfaces/IERC20EIP3009.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.4;\\n\\ninterface IERC20EIP3009 {\\n    function receiveWithAuthorization(\\n        address from,\\n        address to,\\n        uint256 value,\\n        uint256 validAfter,\\n        uint256 validBefore,\\n        bytes32 nonce,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) external;\\n\\n    function approve(address spender, uint256 amount) external returns (bool);\\n}\\n\",\"keccak256\":\"0xb78c7af494a64d98091da63596b203879c408977dd61512e14428192cf6a709c\",\"license\":\"MIT\"},\"contracts/interfaces/IRootChainManager.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.4;\\n\\ninterface IRootChainManager {\\n    function depositFor(\\n        address user,\\n        address rootToken,\\n        bytes calldata depositData\\n    ) external;\\n}\\n\",\"keccak256\":\"0x33ef5dc1d324ef5cbd8a25219eef5e2daa1ee72fc39c6ad5102c4bde24cc21e8\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516104d73803806104d783398101604081905261002f91610114565b600180546001600160a01b038581166001600160a01b03199283168117909355600080548683169084161790556002805491851691909216811790915560405163095ea7b360e01b81526004810191909152600019602482015263095ea7b390604401602060405180830381600087803b1580156100ac57600080fd5b505af11580156100c0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906100e491906100ed565b50505050610178565b6000602082840312156100fe578081fd5b8151801515811461010d578182fd5b9392505050565b600080600060608486031215610128578182fd5b835161013381610160565b602085015190935061014481610160565b604085015190925061015581610160565b809150509250925092565b6001600160a01b038116811461017557600080fd5b50565b610350806101876000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c806319860e03146100515780631f2d00651461008057806344dca68414610093578063bd07018d146100a8575b600080fd5b600254610064906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600154610064906001600160a01b031681565b6100a66100a1366004610230565b6100bb565b005b600054610064906001600160a01b031681565b6001546040517fef55bec60000000000000000000000000000000000000000000000000000000081526001600160a01b038a8116600483015230602483015260448201899052600060648301526084820188905260a4820187905260ff861660c483015260e4820185905261010482018490529091169063ef55bec69061012401600060405180830381600087803b15801561015657600080fd5b505af115801561016a573d6000803e3d6000fd5b50506000546001546040805160208082018d905282518083039091018152818301928390527fe3dec8fb000000000000000000000000000000000000000000000000000000009092526001600160a01b03938416955063e3dec8fb94506101d8938d931691906044016102aa565b600060405180830381600087803b1580156101f257600080fd5b505af1158015610206573d6000803e3d6000fd5b505050505050505050505050565b80356001600160a01b038116811461022b57600080fd5b919050565b600080600080600080600080610100898b03121561024c578384fd5b61025589610214565b975061026360208a01610214565b965060408901359550606089013594506080890135935060a089013560ff8116811461028d578384fd5b979a969950949793969295929450505060c08201359160e0013590565b60006001600160a01b0380861683526020818616818501526060604085015284519150816060850152825b828110156102f1578581018201518582016080015281016102d5565b828111156103025783608084870101525b5050601f01601f19169190910160800194935050505056fea2646970667358221220f332b08678e7dfda71c42fe09b0b1e0967550238a5c6caec3a615178a648f52c64736f6c63430008040033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c806319860e03146100515780631f2d00651461008057806344dca68414610093578063bd07018d146100a8575b600080fd5b600254610064906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600154610064906001600160a01b031681565b6100a66100a1366004610230565b6100bb565b005b600054610064906001600160a01b031681565b6001546040517fef55bec60000000000000000000000000000000000000000000000000000000081526001600160a01b038a8116600483015230602483015260448201899052600060648301526084820188905260a4820187905260ff861660c483015260e4820185905261010482018490529091169063ef55bec69061012401600060405180830381600087803b15801561015657600080fd5b505af115801561016a573d6000803e3d6000fd5b50506000546001546040805160208082018d905282518083039091018152818301928390527fe3dec8fb000000000000000000000000000000000000000000000000000000009092526001600160a01b03938416955063e3dec8fb94506101d8938d931691906044016102aa565b600060405180830381600087803b1580156101f257600080fd5b505af1158015610206573d6000803e3d6000fd5b505050505050505050505050565b80356001600160a01b038116811461022b57600080fd5b919050565b600080600080600080600080610100898b03121561024c578384fd5b61025589610214565b975061026360208a01610214565b965060408901359550606089013594506080890135935060a089013560ff8116811461028d578384fd5b979a969950949793969295929450505060c08201359160e0013590565b60006001600160a01b0380861683526020818616818501526060604085015284519150816060850152825b828110156102f1578581018201518582016080015281016102d5565b828111156103025783608084870101525b5050601f01601f19169190910160800194935050505056fea2646970667358221220f332b08678e7dfda71c42fe09b0b1e0967550238a5c6caec3a615178a648f52c64736f6c63430008040033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6,
+        "contract": "contracts/DepositRouter.sol:DepositRouter",
+        "label": "rootChainManager",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IRootChainManager)143"
+      },
+      {
+        "astId": 9,
+        "contract": "contracts/DepositRouter.sol:DepositRouter",
+        "label": "rootToken",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(IERC20EIP3009)131"
+      },
+      {
+        "astId": 11,
+        "contract": "contracts/DepositRouter.sol:DepositRouter",
+        "label": "predicateContract",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IERC20EIP3009)131": {
+        "encoding": "inplace",
+        "label": "contract IERC20EIP3009",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IRootChainManager)143": {
+        "encoding": "inplace",
+        "label": "contract IRootChainManager",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}
