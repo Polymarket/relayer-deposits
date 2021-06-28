@@ -4,8 +4,9 @@ import { deployments, ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
+import { getReceiveSignature, getEip3009Nonce } from "../src";
 import { DepositRouter } from "../typechain";
-import { deploy, fundAccountETH, fundAccountUSDC, getReceiveSignature } from "./helpers";
+import { deploy, fundAccountETH, fundAccountUSDC } from "./helpers";
 import { MAINNET_CONTRACTS } from "../config";
 
 const { usdc, rootChainManager, usdcPredicate } = MAINNET_CONTRACTS;
@@ -57,7 +58,7 @@ describe("Integration tests", function () {
 
             const value = ONE_USDC;
 
-            const nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+            const nonce = await getEip3009Nonce(admin, usdc);
 
             const { v, r, s } = await getReceiveSignature({
                 signer: admin,

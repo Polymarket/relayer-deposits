@@ -1,8 +1,13 @@
-import { ethers, BigNumber } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { ethers, BigNumber, Signer } from "ethers";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 
-type PermitParams = {
-    signer: SignerWithAddress;
+type TypedDataSigner = {
+    getAddress: () => Promise<string>;
+    _signTypedData: (domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>) => Promise<string>
+}
+
+export type PermitParams = {
+    signer: TypedDataSigner;
     tokenName: string;
     contractVersion: string;
     chainId: number;
@@ -45,7 +50,7 @@ export const getReceiveSignature = async ({
     };
 
     const eip712Value = {
-        from: signer.address,
+        from: await signer.getAddress(),
         to,
         value,
         validAfter,

@@ -6,7 +6,8 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
 import { DepositRouter, TestToken } from "../typechain";
-import { deploy, deployMock, getReceiveSignature } from "./helpers";
+import { getReceiveSignature, getEip3009Nonce } from "../src";
+import { deploy, deployMock } from "./helpers";
 
 const setup = deployments.createFixture(async () => {
 
