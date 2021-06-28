@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-interface IERC20EIP3009 {
+interface IERC20WithEIP3009 {
     function receiveWithAuthorization(
         address from,
         address to,
