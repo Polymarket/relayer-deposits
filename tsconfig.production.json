@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+      "sourceMap": false,
+      "declaration": true
+  },
+  "exclude": [
+      "artifacts/**/*",
+      "artifacts/**/*.json",
+      "deploy/**/*",
+      "scripts/**/*",
+      "tasks/**/*",
+      "test/**/*",
+      "typechain/**/*",
+      "types/**/*",
+      "hardhat.config.ts"
+  ]
+}
