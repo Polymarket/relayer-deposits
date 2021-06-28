@@ -21,6 +21,7 @@ const setup = deployments.createFixture(async () => {
         usdc,
         [
             "function transfer(address, uint256) public",
+            "function balanceOf(address) public view returns (uint256)"
         ],
         ethers.provider
     );
@@ -46,7 +47,15 @@ describe("Integration tests", function () {
         let usdcContract: Contract;
         let admin: SignerWithAddress;
 
-        beforeEach(async function () {
+        let reusedV: number;
+        let reusedR: string;
+        let reusedS: string;
+
+        let reusedValue: BigNumber;
+        let reusedNonce: string;
+        let reusedValidBefore: number;
+
+        before(async function () {
             const deployment = await setup();
             router = deployment.router;
             usdcContract = deployment.usdcContract;
@@ -87,6 +96,68 @@ describe("Integration tests", function () {
                 r,
                 s
             )).to.emit(predicate, "LockedERC20").withArgs(router.address, admin.address, usdc, value);
+
+            reusedV = v;
+            reusedR = r;
+            reusedS = s;
+
+            reusedValue = value;
+            reusedNonce = nonce;
+            reusedValidBefore = validBefore;
         });
+
+        it("initial transfer should revert if deposit doesn't succeed", async () => {
+            const expectZeroBalance = async (): Promise<void> => {
+                const routerBalance = await usdcContract.balanceOf(router.address)
+                expect(routerBalance.toString()).to.equal("0");
+            }
+
+            await expectZeroBalance();
+
+            const validBefore = Math.floor(Date.now() / 1000);
+
+            const value = ONE_USDC;
+
+            const nonce = await getEip3009Nonce(admin, usdc);
+
+            const { v, r, s } = await getReceiveSignature({
+                signer: admin,
+                tokenName: "USD Coin",
+                contractVersion: "2",
+                chainId: 1,
+                verifyingContract: usdc,
+                to: router.address,
+                value,
+                nonce,
+                validBefore,
+                validAfter: 0,
+            });
+
+            await expect(router.deposit(
+                admin.address,
+                ethers.constants.AddressZero,
+                value,
+                validBefore,
+                nonce,
+                v,
+                r,
+                s
+            )).to.be.revertedWith("RootChainManager: INVALID_USER");
+
+            await expectZeroBalance();
+        });
+
+        it("fails on reused signature", async () => {
+            await expect(router.deposit(
+                admin.address,
+                admin.address,
+                reusedValue,
+                reusedValidBefore,
+                reusedNonce,
+                reusedV,
+                reusedR,
+                reusedS
+            )).to.be.revertedWith("FiatTokenV2: authorization is used or canceled")
+        })
     });
 });
