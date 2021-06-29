@@ -15,7 +15,6 @@
     "@ethersproject/bignumber": "^5.0.8",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@openzeppelin/contracts": "3.2.0",
     "@typechain/ethers-v5": "^5.0.0",
     "@typechain/hardhat": "^1.0.1",
     "@types/chai": "^4.2.13",
@@ -79,5 +78,8 @@
     "typechain": "hardhat typechain",
     "build:ts": "tsc --project ./tsconfig.production.json",
     "clean:ts": "rimraf dist"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0"
   }
 }

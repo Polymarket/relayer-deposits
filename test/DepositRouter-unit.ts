@@ -6,7 +6,7 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
 import { DepositRouter, TestToken } from "../typechain";
-import { getReceiveSignature, getEip3009Nonce } from "../src";
+import { getReceiveSignature, getEip3009Nonce, getDepositSignature, Signature } from "../src";
 import { deploy, deployMock } from "./helpers";
 
 const setup = deployments.createFixture(async () => {
@@ -29,7 +29,7 @@ const setup = deployments.createFixture(async () => {
     const predicateContract = ethers.Wallet.createRandom().address
 
     const router = await deploy<DepositRouter>("DepositRouter", {
-        args: [testToken.address, rootChainManagerMock.address, predicateContract],
+        args: [testToken.address, rootChainManagerMock.address, predicateContract, admin.address],
         connect: admin,
     });
 
@@ -52,7 +52,12 @@ describe("Unit tests", function () {
         let predicateContract: string;
         let tokenVersion: string;
 
-        beforeEach(async function () {
+        let receiveSig: Signature;
+        let depositSig: Signature;
+        let depositAmount: BigNumber;
+        let fee: BigNumber;
+
+        before(async function () {
             const deployment = await setup();
             router = deployment.router;
             testToken = deployment.testToken;
@@ -62,19 +67,38 @@ describe("Unit tests", function () {
             tokenVersion = deployment.tokenVersion;
         });
 
+        it("has the expected domain separator", async () => {
+            const domain = {
+                name: await router.name(),
+                chainId: 31337,
+                verifyingContract: router.address,
+            };
+
+            const expectedSeparator = ethers.utils._TypedDataEncoder.hashDomain(domain);
+
+            const returnedSeparator = await router.domainSeparator();
+
+            expect(returnedSeparator).to.equal(expectedSeparator);
+        });
+
+        it("is owned by the admin", async () => {
+            expect(await router.owner()).to.equal(admin.address);
+        })
+
         it("deposit router has approved the predicate contract max uint256", async function () {
             const allowance = await testToken.allowance(router.address, predicateContract)
             expect(allowance.toString()).to.equal(ethers.constants.MaxUint256.toString());
-        })
+        });
 
         it("should transfer tokens to the deposit contract", async function () {
             const validBefore = Math.floor(Date.now() / 1000 + 3600);
 
-            const depositAmount = ethers.constants.WeiPerEther;
+            depositAmount = ethers.constants.WeiPerEther;
+            fee = ethers.constants.WeiPerEther.div(1000);
 
             const nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
-            const { v, r, s } = await getReceiveSignature({
+            receiveSig = await getReceiveSignature({
                 signer: admin,
                 tokenName,
                 contractVersion: tokenVersion,
@@ -87,16 +111,49 @@ describe("Unit tests", function () {
                 validAfter: 0,
             });
 
+            depositSig = await getDepositSignature({
+                signer: admin,
+                contractName: await router.name(),
+                chainId: 31337,
+                verifyingContract: router.address,
+                depositRecipient: admin.address,
+                totalValue: depositAmount,
+                fee,
+                nonce: await router.nonces(admin.address),
+            });
+
             expect (await router.deposit(
                 admin.address,
                 admin.address,
                 depositAmount,
+                fee,
                 validBefore,
                 nonce,
-                v,
-                r,
-                s
+                receiveSig,
+                depositSig
             )).to.emit(testToken, "Transfer").withArgs(admin.address, router.address, depositAmount);
         });
+
+        it("reverts when reusing the signature", async () => {
+            await expect(router.deposit(
+                admin.address,
+                admin.address,
+                depositAmount,
+                fee,
+                Math.floor(Date.now() / 1000 + 3600),
+                ethers.utils.hexlify(ethers.utils.randomBytes(32)),
+                receiveSig,
+                depositSig,
+            )).to.be.revertedWith("EIP712 invalid deposit signature");
+        });
+
+        it("owner is able to claim fees", async () => {
+            await expect(router.claimFees(admin.address, 100)).to.emit(testToken, "Transfer").withArgs(router.address, admin.address, 100);
+        });
+
+        it("reverts when address other than owner tries to claim fees", async () => {
+            const randomSigner = (await ethers.getSigners())[5];
+            await expect(router.connect(randomSigner).claimFees(randomSigner.address, 100)).to.be.revertedWith("Ownable: caller is not the owner");
+        })
     });
 });

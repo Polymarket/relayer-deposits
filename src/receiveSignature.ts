@@ -1,12 +1,8 @@
-import { ethers, BigNumber, Signer } from "ethers";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { ethers, BigNumber } from "ethers";
 
-type TypedDataSigner = {
-    getAddress: () => Promise<string>;
-    _signTypedData: (domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>) => Promise<string>
-}
+import type { TypedDataSigner, Signature } from "./types";
 
-export type PermitParams = {
+export type ReceiveParams = {
     signer: TypedDataSigner;
     tokenName: string;
     contractVersion: string;
@@ -17,7 +13,7 @@ export type PermitParams = {
     nonce: string;
     validAfter: number;
     validBefore: number;
-}
+};
 
 export const getReceiveSignature = async ({
     signer,
@@ -30,7 +26,7 @@ export const getReceiveSignature = async ({
     nonce,
     validAfter,
     validBefore,
-}: PermitParams): Promise<{ v: number; r: string; s: string }> => {
+}: ReceiveParams): Promise<Signature> => {
     const domain = {
         name: tokenName,
         version: contractVersion,

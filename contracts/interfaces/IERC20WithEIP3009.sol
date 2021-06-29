@@ -16,4 +16,6 @@ interface IERC20WithEIP3009 {
     ) external;
 
     function approve(address spender, uint256 amount) external returns (bool);
+
+    function transfer(address recipient, uint256 amount) external returns (bool);
 }

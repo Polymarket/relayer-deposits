@@ -8,8 +8,8 @@
 
 pragma solidity 0.6.12;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { SafeMath } from "./lib/SafeMath.sol";
+import { Address } from "./lib/Address.sol";
 
 import { IERC20Internal } from "./lib/IERC20Internal.sol";
 import { EIP3009 } from "./lib/EIP3009.sol";
