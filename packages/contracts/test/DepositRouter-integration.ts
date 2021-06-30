@@ -7,9 +7,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { getReceiveSignature, getEip3009Nonce, Signature } from "../src";
 import { DepositRouter } from "../typechain";
 import { deploy, fundAccountETH, fundAccountUSDC } from "./helpers";
-import { MAINNET_CONTRACTS } from "../config";
+import { getContracts } from "../config";
 
-const { usdc, rootChainManager, usdcPredicate } = MAINNET_CONTRACTS;
+const { usdc, rootChainManager, usdcPredicate } = getContracts(1);
 
 const ONE_USDC = BigNumber.from(10).pow(6);
 

@@ -1,12 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { getConfig } from "../config";
-
-const { usdc, rootChainManager, usdcPredicate } = MAINNET_CONTRACTS;
+import { getContracts } from "../config";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-    const { deployments, getNamedAccounts } = hre;
+    const { deployments, getNamedAccounts, network } = hre;
+    const { usdc, rootChainManager, usdcPredicate } = getContracts(network.config.chainId as number);
 
     const { deployer } = await getNamedAccounts();
 
