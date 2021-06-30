@@ -5,10 +5,6 @@ interface Chain {
 
 const chains: Chain[] = [
     {
-        id: 42,
-        rpcUrls: [`https://kovan.infura.io/v3/${process.env.INFURA_KEY}`],
-    },
-    {
         id: 5,
         rpcUrls: [`https://goerli.infura.io/v3/${process.env.INFURA_KEY}`],
     },
@@ -30,4 +26,19 @@ export function getChain(id: number): Chain {
     if (chain) return chain;
 
     throw new Error(`Couldn't find chain ${id}`);
+}
+
+const MAINNET_ROUTER = "";
+const GOERLI_ROUTER = "0xD08ec47D0c0391E70CD458E423E6f4bD6FDC02fa";
+
+export function getRouterAddress(network: number): string {
+    switch (network) {
+        case 1:
+            return MAINNET_ROUTER;
+        case 5:
+            return GOERLI_ROUTER;
+        default:
+            console.log(`WARNING: using goerli router address with network id ${network}`);
+            return GOERLI_ROUTER;
+    }
 }
