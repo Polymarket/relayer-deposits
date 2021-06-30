@@ -12,12 +12,10 @@ contract DepositRouter is AccessControl {
     IERC20WithEIP3009 public rootToken;
     address public predicateContract;
 
-    // DEFAULT_ADMIN_ROLE =
-    //      0x0000000000000000000000000000000000000000000000000000000000000000;
+    // bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
     // keccak256("RELAYER_ROLE")
-    bytes32 public constant RELAYER_ROLE =
-        0xe2b7fb3b832174769106daebcfd6d1970523240dda11281102db9363b83b0dc4;
+    bytes32 public constant RELAYER_ROLE = 0xe2b7fb3b832174769106daebcfd6d1970523240dda11281102db9363b83b0dc4;
 
     struct Sig {
         uint8 v;
@@ -37,7 +35,7 @@ contract DepositRouter is AccessControl {
         predicateContract = _predicateContract;
 
         // hit predicateContract with a max approval
-        rootToken.approve(predicateContract, type(uint).max);
+        rootToken.approve(predicateContract, type(uint256).max);
 
         // set up roles
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
@@ -60,9 +58,10 @@ contract DepositRouter is AccessControl {
      * @param from - the address executing the deposit
      * @param depositRecipient - the address to receive the deposit on matic
      * @param totalValue - the amount to deposit
-     * @param fee - the fee to pay for gas. Expected that this function is called by a relayer who controls this contract.
+     * @param fee - the fee to pay for gas.
      * @param validBefore - the deadline for executing the deposit
-     * @param nonce - a unique random nonce for the deposit (NOT a sequential nonce see https://eips.ethereum.org/EIPS/eip-3009#unique-random-nonce-instead-of-sequential-nonce)
+     * @param nonce - a unique random nonce for the deposit (NOT a sequential nonce see
+     *      https://eips.ethereum.org/EIPS/eip-3009#unique-random-nonce-instead-of-sequential-nonce)
      * @param receiveSig - the EIP712 signature for `IERC20WithEIP3009.receiveWithAuthorization`
      */
     function deposit(

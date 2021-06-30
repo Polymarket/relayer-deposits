@@ -28,8 +28,8 @@ const config: HardhatUserConfig = {
             chainId: ChainId.hardhat,
             saveDeployments: false,
             forking: {
-                url: `https://mainnet.infura.io/v3/${infuraApiKey}`
-            }
+                url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
+            },
         },
         mainnet: { accounts, ...getRemoteNetworkConfig("mainnet") },
         goerli: { accounts, ...getRemoteNetworkConfig("goerli") },
@@ -54,8 +54,8 @@ const config: HardhatUserConfig = {
             },
             {
                 version: "0.6.12",
-            }
-        ]
+            },
+        ],
     },
     typechain: {
         outDir: "typechain",

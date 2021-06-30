@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 import { expect } from "chai";
-import { deployments, ethers, network } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
@@ -19,11 +19,8 @@ const setup = deployments.createFixture(async () => {
 
     const usdcContract = new ethers.Contract(
         usdc,
-        [
-            "function transfer(address, uint256) public",
-            "function balanceOf(address) public view returns (uint256)"
-        ],
-        ethers.provider
+        ["function transfer(address, uint256) public", "function balanceOf(address) public view returns (uint256)"],
+        ethers.provider,
     );
 
     await fundAccountETH(admin.address, ONE_ETH.mul(100000));
@@ -31,7 +28,7 @@ const setup = deployments.createFixture(async () => {
 
     const router = await deploy<DepositRouter>("DepositRouter", {
         args: [usdc, rootChainManager, usdcPredicate, admin.address, [admin.address]],
-        connect: admin
+        connect: admin,
     });
 
     return {
@@ -82,23 +79,18 @@ describe("Integration tests", function () {
                 validAfter: 0,
             });
 
-            const predicate = new ethers.Contract(usdcPredicate, [
-                "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)"
-            ], ethers.provider);
+            const predicate = new ethers.Contract(
+                usdcPredicate,
+                ["event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)"],
+                ethers.provider,
+            );
 
-            await expect(router.deposit(
-                admin.address,
-                admin.address,
-                value,
-                fee,
-                validBefore,
-                nonce,
-                receiveSig,
-            )).to.emit(predicate, "LockedERC20").withArgs(router.address, admin.address, usdc, value.sub(fee));
+            await expect(router.deposit(admin.address, admin.address, value, fee, validBefore, nonce, receiveSig))
+                .to.emit(predicate, "LockedERC20")
+                .withArgs(router.address, admin.address, usdc, value.sub(fee));
 
             reusedReceiveSig = receiveSig;
 
-            fee = fee;
             reusedValue = value;
             reusedNonce = nonce;
             reusedValidBefore = validBefore;
@@ -107,13 +99,13 @@ describe("Integration tests", function () {
         it("DepositRouter contract has a balance of the fee", async () => {
             const balance = await usdcContract.balanceOf(router.address);
             expect(balance.toString()).to.equal(fee.toString());
-        })
+        });
 
         it("initial transfer should revert if deposit doesn't succeed", async () => {
             const expectBalanceIsFee = async (): Promise<void> => {
-                const routerBalance = await usdcContract.balanceOf(router.address)
+                const routerBalance = await usdcContract.balanceOf(router.address);
                 expect(routerBalance.toString()).to.equal(fee.toString());
-            }
+            };
 
             await expectBalanceIsFee();
 
@@ -136,29 +128,25 @@ describe("Integration tests", function () {
                 validAfter: 0,
             });
 
-            await expect(router.deposit(
-                admin.address,
-                ethers.constants.AddressZero,
-                value,
-                fee,
-                validBefore,
-                nonce,
-                receiveSig,
-            )).to.be.revertedWith("RootChainManager: INVALID_USER");
+            await expect(
+                router.deposit(admin.address, ethers.constants.AddressZero, value, fee, validBefore, nonce, receiveSig),
+            ).to.be.revertedWith("RootChainManager: INVALID_USER");
 
             await expectBalanceIsFee();
         });
 
         it("fails on reused signature", async () => {
-            await expect(router.deposit(
-                admin.address,
-                admin.address,
-                reusedValue,
-                fee,
-                reusedValidBefore,
-                reusedNonce,
-                reusedReceiveSig,
-            )).to.be.revertedWith("FiatTokenV2: authorization is used or canceled")
-        })
+            await expect(
+                router.deposit(
+                    admin.address,
+                    admin.address,
+                    reusedValue,
+                    fee,
+                    reusedValidBefore,
+                    reusedNonce,
+                    reusedReceiveSig,
+                ),
+            ).to.be.revertedWith("FiatTokenV2: authorization is used or canceled");
+        });
     });
 });

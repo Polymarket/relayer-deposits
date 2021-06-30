@@ -42,7 +42,7 @@ export const getReceiveSignature = async ({
             { name: "validAfter", type: "uint256" },
             { name: "validBefore", type: "uint256" },
             { name: "nonce", type: "bytes32" },
-        ]
+        ],
     };
 
     const eip712Value = {
@@ -54,7 +54,7 @@ export const getReceiveSignature = async ({
         nonce,
     };
 
-    const signature = await signer._signTypedData(domain, types, eip712Value);
+    const signature = await signer._signTypedData(domain, types, eip712Value); // eslint-disable-line
 
     return ethers.utils.splitSignature(signature);
-}
+};
