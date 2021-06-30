@@ -1,0 +1,37 @@
+{
+  "name": "@polymarket/deposit-relay-server",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/server",
+    "build": "",
+    "post-build": "yarn start",
+    "lint": "eslint --config ./.eslintrc.js src"
+  },
+  "dependencies": {
+    "@ethersproject/bignumber": "^5.1.0",
+    "@ethersproject/bytes": "^5.1.0",
+    "@ethersproject/contracts": "^5.1.1",
+    "@ethersproject/signing-key": "^5.1.0",
+    "@ethersproject/wallet": "^5.1.0",
+    "@koa/cors": "^3.1.0",
+    "@openzeppelin/gsn-helpers": "^0.2.3",
+    "@polymarket/multi-endpoint-provider": "^0.0.3",
+    "@types/koa": "^2.11.4",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.1",
+    "@types/koa__cors": "^3.0.1",
+    "dotenv": "^8.2.0",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^9.4.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-typescript-prettier": "^4.2.0",
+    "prettier": "^2.2.1"
+  }
+}
