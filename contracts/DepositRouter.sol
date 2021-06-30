@@ -98,10 +98,4 @@ contract DepositRouter is AccessControl {
             abi.encode(totalValue - fee) // will revert on underflow
         );
     }
-
-    function _getChainId() internal view returns (uint) {
-        uint chainId;
-        assembly { chainId := chainid() }
-        return chainId;
-    }
 }
