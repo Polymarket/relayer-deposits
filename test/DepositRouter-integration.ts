@@ -4,7 +4,7 @@ import { deployments, ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
-import { getReceiveSignature, getEip3009Nonce, Signature, getDepositSignature } from "../src";
+import { getReceiveSignature, getEip3009Nonce, Signature } from "../src";
 import { DepositRouter } from "../typechain";
 import { deploy, fundAccountETH, fundAccountUSDC } from "./helpers";
 import { MAINNET_CONTRACTS } from "../config";
@@ -30,7 +30,7 @@ const setup = deployments.createFixture(async () => {
     await fundAccountUSDC(admin, ONE_ETH.mul(10), usdc);
 
     const router = await deploy<DepositRouter>("DepositRouter", {
-        args: [usdc, rootChainManager, usdcPredicate, admin.address],
+        args: [usdc, rootChainManager, usdcPredicate, admin.address, [admin.address]],
         connect: admin
     });
 
@@ -82,17 +82,6 @@ describe("Integration tests", function () {
                 validAfter: 0,
             });
 
-            const depositSig = await getDepositSignature({
-                signer: admin,
-                contractName: await router.name(),
-                chainId: 31337,
-                verifyingContract: router.address,
-                depositRecipient: admin.address,
-                totalValue: value,
-                fee,
-                nonce: await router.nonces(admin.address),
-            })
-
             const predicate = new ethers.Contract(usdcPredicate, [
                 "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)"
             ], ethers.provider);
@@ -105,7 +94,6 @@ describe("Integration tests", function () {
                 validBefore,
                 nonce,
                 receiveSig,
-                depositSig,
             )).to.emit(predicate, "LockedERC20").withArgs(router.address, admin.address, usdc, value.sub(fee));
 
             reusedReceiveSig = receiveSig;
@@ -148,17 +136,6 @@ describe("Integration tests", function () {
                 validAfter: 0,
             });
 
-            const depositSig = await getDepositSignature({
-                signer: admin,
-                contractName: await router.name(),
-                chainId: 31337,
-                verifyingContract: router.address,
-                depositRecipient: ethers.constants.AddressZero,
-                totalValue: value,
-                fee: fee,
-                nonce: await router.nonces(admin.address),
-            })
-
             await expect(router.deposit(
                 admin.address,
                 ethers.constants.AddressZero,
@@ -167,24 +144,12 @@ describe("Integration tests", function () {
                 validBefore,
                 nonce,
                 receiveSig,
-                depositSig,
             )).to.be.revertedWith("RootChainManager: INVALID_USER");
 
             await expectBalanceIsFee();
         });
 
         it("fails on reused signature", async () => {
-            const depositSig = await getDepositSignature({
-                signer: admin,
-                contractName: await router.name(),
-                chainId: 31337,
-                verifyingContract: router.address,
-                depositRecipient: admin.address,
-                totalValue: reusedValue,
-                fee: fee,
-                nonce: await router.nonces(admin.address),
-            });
-
             await expect(router.deposit(
                 admin.address,
                 admin.address,
@@ -193,7 +158,6 @@ describe("Integration tests", function () {
                 reusedValidBefore,
                 reusedNonce,
                 reusedReceiveSig,
-                depositSig,
             )).to.be.revertedWith("FiatTokenV2: authorization is used or canceled")
         })
     });

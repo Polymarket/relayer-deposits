@@ -2,31 +2,22 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "./interfaces/IERC20WithEIP3009.sol";
 import "./interfaces/IRootChainManager.sol";
 
-contract DepositRouter is Ownable {
+contract DepositRouter is AccessControl {
     IRootChainManager public rootChainManager;
     IERC20WithEIP3009 public rootToken;
     address public predicateContract;
 
-    mapping(address => uint256) public nonces;
+    // DEFAULT_ADMIN_ROLE =
+    //      0x0000000000000000000000000000000000000000000000000000000000000000;
 
-    string public constant name = "PM DepositRouter v1";
-    bytes32 public domainSeparator;
-
-    // The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH = keccak256(
-        "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
-    );
-
-    // The EIP-712 typehash for the claim id struct
-    bytes32 public constant DEPOSIT_TYPEHASH = keccak256(
-        "Deposit(address depositRecipient,uint256 totalValue,uint256 fee,uint256 nonce)"
-    );
+    // keccak256("RELAYER_ROLE")
+    bytes32 public constant RELAYER_ROLE =
+        0xe2b7fb3b832174769106daebcfd6d1970523240dda11281102db9363b83b0dc4;
 
     struct Sig {
         uint8 v;
@@ -38,7 +29,8 @@ contract DepositRouter is Ownable {
         IERC20WithEIP3009 _rootToken,
         IRootChainManager _rootChainManager,
         address _predicateContract,
-        address owner
+        address admin,
+        address[] memory relayers
     ) {
         rootToken = _rootToken;
         rootChainManager = _rootChainManager;
@@ -47,17 +39,15 @@ contract DepositRouter is Ownable {
         // hit predicateContract with a max approval
         rootToken.approve(predicateContract, type(uint).max);
 
-        domainSeparator = keccak256(abi.encode(
-            DOMAIN_TYPEHASH,
-            keccak256(bytes(name)),
-            _getChainId(),
-            address(this)
-        ));
+        // set up roles
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
 
-        transferOwnership(owner);
+        for (uint256 i = 0; i < relayers.length; ++i) {
+            _setupRole(RELAYER_ROLE, relayers[i]);
+        }
     }
 
-    function claimFees(address to, uint256 amount) external onlyOwner {
+    function claimFees(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         rootToken.transfer(to, amount);
     }
 
@@ -74,7 +64,6 @@ contract DepositRouter is Ownable {
      * @param validBefore - the deadline for executing the deposit
      * @param nonce - a unique random nonce for the deposit (NOT a sequential nonce see https://eips.ethereum.org/EIPS/eip-3009#unique-random-nonce-instead-of-sequential-nonce)
      * @param receiveSig - the EIP712 signature for `IERC20WithEIP3009.receiveWithAuthorization`
-     * @param depositSig - the EIP712 signature to verify the `from` has approved the deposit and gas fee
      */
     function deposit(
         address from,
@@ -83,13 +72,8 @@ contract DepositRouter is Ownable {
         uint256 fee,
         uint256 validBefore,
         bytes32 nonce,
-        Sig calldata receiveSig,
-        Sig calldata depositSig
-    ) external {
-        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, depositRecipient, totalValue, fee, nonces[from]++));
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
-        require(ECDSA.recover(digest, depositSig.v, depositSig.r, depositSig.s) == from, "EIP712 invalid deposit signature");
-
+        Sig calldata receiveSig
+    ) external onlyRole(RELAYER_ROLE) {
         /**
          * receiveWithAuthorization rather than transferWithAuthorization to prevent front-running
          * attack where someone takes a transferWithAuthorization signature before the transaction has been mined
