@@ -6,12 +6,12 @@ interface Chain {
 const chains: Chain[] = [
     {
         id: 5,
-        rpcUrls: [`https://goerli.infura.io/v3/${process.env.INFURA_KEY}`],
+        rpcUrls: [`https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`],
     },
     {
         id: 1,
-        rpcUrls: [`https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`],
-    }
+        rpcUrls: [`https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`],
+    },
     {
         id: 31337,
         rpcUrls: ["http://localhost:8545"],
@@ -34,7 +34,7 @@ const GOERLI_ROUTER = "0xD08ec47D0c0391E70CD458E423E6f4bD6FDC02fa";
 export function getRouterAddress(network: number): string {
     switch (network) {
         case 1:
-            return MAINNET_ROUTER;
+            throw new Error("MAINNET ROUTER NOT DEPLOYED");
         case 5:
             return GOERLI_ROUTER;
         default:

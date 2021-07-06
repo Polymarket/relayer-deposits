@@ -10,14 +10,6 @@ if (process.env.NODE_ENV === "production") {
 
 dotenvConfig({ path: resolve(__dirname, envPath) });
 
-if (!process.env.NETWORK_ID) {
-    throw new Error("Environment must specify `NETWORK_ID`.");
+if (!process.env.INFURA_API_KEY) {
+    throw new Error("Environment must specify `INFURA_API_KEY`.");
 }
-
-const networkId = process.env.NETWORK_ID as string;
-
-export const NETWORK_ID = parseInt(networkId, 10);
-
-export const HUB_ADDRESS = "0xd216153c06e857cd7f72665e0af1d7d82172f494";
-
-export const MATIC_GAS_PRICE = 2500000000;

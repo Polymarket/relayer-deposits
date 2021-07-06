@@ -6,6 +6,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "outDir": "./build",
-    "strict": true
+    "strict": false
   }
 }
