@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { getReceiveSignature, Signature } from "@polymarket/deposit-relayer-sdk";
 
 import { DepositRouter, TestToken } from "../typechain";
-import { getReceiveSignature, Signature } from "../src";
 import { deploy, deployMock } from "./helpers";
 
 const setup = deployments.createFixture(async () => {

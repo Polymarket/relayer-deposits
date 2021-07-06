@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { getReceiveSignature, getEip3009Nonce, Signature } from "@polymarket/deposit-relayer-sdk";
 
-import { getReceiveSignature, getEip3009Nonce, Signature } from "../src";
 import { DepositRouter } from "../typechain";
 import { deploy, fundAccountETH, fundAccountUSDC } from "./helpers";
 import { getContracts } from "../config";
