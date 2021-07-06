@@ -28,17 +28,17 @@ export function getChain(id: number): Chain {
     throw new Error(`Couldn't find chain ${id}`);
 }
 
-const MAINNET_ROUTER = "";
+const MAINNET_ROUTER = "0x60A4A8A77198D798D21d8D0299DDBbb9F24353B9";
 const GOERLI_ROUTER = "0xD08ec47D0c0391E70CD458E423E6f4bD6FDC02fa";
 
 export function getRouterAddress(network: number): string {
     switch (network) {
         case 1:
-            throw new Error("MAINNET ROUTER NOT DEPLOYED");
+            return MAINNET_ROUTER;
         case 5:
             return GOERLI_ROUTER;
         default:
-            console.log(`WARNING: using goerli router address with network id ${network}`);
-            return GOERLI_ROUTER;
+            console.log(`WARNING: using mainnet router address with network id ${network}`);
+            return MAINNET_ROUTER;
     }
 }
