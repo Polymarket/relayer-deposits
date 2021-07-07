@@ -3,9 +3,10 @@ import { expect } from "chai";
 import { deployments, ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
-import { getReceiveSignature, getEip3009Nonce, Signature } from "@polymarket/deposit-relayer-sdk";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
+import { splitSignature } from "@ethersproject/bytes";
 
+import { getReceiveSignature, getEip3009Nonce, Signature } from "../sdk";
 import { DepositRouter } from "../typechain";
 import { deploy } from "./helpers";
 import { getContracts } from "../config";
@@ -16,7 +17,7 @@ const ONE_USDC = BigNumber.from(10).pow(6);
 
 const setup = deployments.createFixture(async () => {
     const admin = await ethers.getNamedSigner("admin");
-    const ONE_ETH = BigNumber.from(10).pow(18).mul(10);
+    const ONE_ETH = BigNumber.from(10).pow(18);
 
     const usdcContract = new ethers.Contract(
         usdc,
@@ -67,7 +68,7 @@ describe("Integration tests", function () {
 
             const nonce = await getEip3009Nonce(admin, usdc);
 
-            const receiveSig = await getReceiveSignature({
+            const receiveSig = splitSignature(await getReceiveSignature({
                 signer: admin,
                 tokenName: "USD Coin",
                 contractVersion: "2",
@@ -78,7 +79,7 @@ describe("Integration tests", function () {
                 nonce,
                 validBefore,
                 validAfter: 0,
-            });
+            }));
 
             const predicate = new ethers.Contract(
                 usdcPredicate,
@@ -116,7 +117,7 @@ describe("Integration tests", function () {
 
             const nonce = await getEip3009Nonce(admin, usdc);
 
-            const receiveSig = await getReceiveSignature({
+            const receiveSig = splitSignature(await getReceiveSignature({
                 signer: admin,
                 tokenName: "USD Coin",
                 contractVersion: "2",
@@ -127,7 +128,7 @@ describe("Integration tests", function () {
                 nonce,
                 validBefore,
                 validAfter: 0,
-            });
+            }));
 
             await expect(
                 router.deposit(admin.address, ethers.constants.AddressZero, value, fee, validBefore, nonce, receiveSig),

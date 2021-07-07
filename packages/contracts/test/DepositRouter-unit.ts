@@ -3,8 +3,9 @@ import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
-import { getReceiveSignature, Signature } from "@polymarket/deposit-relayer-sdk";
+import { splitSignature } from "@ethersproject/bytes";
 
+import { getReceiveSignature, Signature } from "../sdk";
 import { DepositRouter, TestToken } from "../typechain";
 import { deploy, deployMock } from "./helpers";
 
@@ -98,7 +99,7 @@ describe("Unit tests", function () {
 
             nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
-            receiveSig = await getReceiveSignature({
+            receiveSig = splitSignature(await getReceiveSignature({
                 signer: admin,
                 tokenName,
                 contractVersion: tokenVersion,
@@ -109,7 +110,7 @@ describe("Unit tests", function () {
                 nonce,
                 validBefore,
                 validAfter: 0,
-            });
+            }));
 
             expect(
                 await router.deposit(admin.address, admin.address, depositAmount, fee, validBefore, nonce, receiveSig),

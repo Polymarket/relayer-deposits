@@ -1,7 +1,6 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { splitSignature } from "@ethersproject/bytes";
 
-import type { TypedDataSigner, Signature } from "./types";
+import type { TypedDataSigner } from "./types";
 
 export type ReceiveParams = {
     signer: TypedDataSigner;
@@ -27,7 +26,7 @@ export const getReceiveSignature = async ({
     nonce,
     validAfter,
     validBefore,
-}: ReceiveParams): Promise<Signature> => {
+}: ReceiveParams): Promise<string> => {
     const domain = {
         name: tokenName,
         version: contractVersion,
@@ -55,7 +54,5 @@ export const getReceiveSignature = async ({
         nonce,
     };
 
-    const signature = await signer._signTypedData(domain, types, eip712Value); // eslint-disable-line
-
-    return splitSignature(signature);
+    return signer._signTypedData(domain, types, eip712Value); // eslint-disable-line
 };

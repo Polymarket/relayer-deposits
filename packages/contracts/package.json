@@ -1,5 +1,5 @@
 {
-  "name": "@polymarket/relayer-deposits-contracts",
+  "name": "@polymarket/relayer-deposits",
   "description": "Setup for writing Solidity smart contracts",
   "version": "0.0.1",
   "contributors": [
@@ -11,7 +11,6 @@
   "devDependencies": {
     "@commitlint/cli": "^9.1.2",
     "@commitlint/config-conventional": "^9.1.2",
-    "@ethersproject/abstract-signer": "^5.0.6",
     "@ethersproject/bignumber": "^5.0.8",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -52,7 +51,9 @@
   },
   "files": [
     "/contracts",
-    "/dist"
+    "/dist",
+    "deployments",
+    "!/test"
   ],
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -75,7 +76,8 @@
     "lint": "yarn run lint:sol && yarn run lint:ts && yarn run prettier:list-different",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.yaml --ignore-path ./.eslintignore .",
-    "test": "hardhat test",
+    "test": "hardhat test ./test/*",
+    "test:sdk": "hardhat test ./test-sdk/*",
     "typechain": "hardhat typechain",
     "build:ts": "tsc --project ./tsconfig.production.json",
     "clean:ts": "rimraf dist",
@@ -83,6 +85,10 @@
     "run-fork": "hardhat node --network hardhat --no-deploy"
   },
   "dependencies": {
+    "@ethersproject/abstract-signer": "^5.4.0",
+    "@ethersproject/bytes": "^5.4.0",
+    "@ethersproject/contracts": "^5.4.0",
+    "@ethersproject/random": "^5.4.0",
     "@openzeppelin/contracts": "^4.1.0"
   }
 }

@@ -20,9 +20,10 @@
         "scripts/**/*",
         "tasks/**/*",
         "test/**/*",
+        "test-sdk/**/*",
         "typechain/**/*",
         "types/**/*",
         "hardhat.config.ts",
-        "src/**/*"
+        "sdk/**/*"
     ]
 }

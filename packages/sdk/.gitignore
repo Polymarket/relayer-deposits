@@ -1,7 +1,0 @@
-# folders
-node_modules/
-lib
-lib.esm
-
-*.log
-*.tgz
