@@ -1,12 +1,13 @@
 /* eslint-disable func-names */
 import { expect } from "chai";
-import { deployments, ethers } from "hardhat";
+import { deployments, ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { getReceiveSignature, getEip3009Nonce, Signature } from "@polymarket/deposit-relayer-sdk";
+import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 
 import { DepositRouter } from "../typechain";
-import { deploy, fundAccountETH, fundAccountUSDC } from "./helpers";
+import { deploy } from "./helpers";
 import { getContracts } from "../config";
 
 const { usdc, rootChainManager, usdcPredicate } = getContracts(1);
@@ -23,7 +24,7 @@ const setup = deployments.createFixture(async () => {
         ethers.provider,
     );
 
-    await fundAccountETH(admin.address, ONE_ETH.mul(100000));
+    await fundAccountETH(admin.address, ONE_ETH.mul(100000), network.provider, ethers.getSigner);
     await fundAccountUSDC(admin, ONE_ETH.mul(10), usdc);
 
     const router = await deploy<DepositRouter>("DepositRouter", {

@@ -36,6 +36,7 @@
     "hardhat-deploy": "^0.7.5",
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^4.3.0",
+    "mainnet-fork-helpers": "^0.0.1",
     "mocha": "^8.1.3",
     "prettier": "^2.1.2",
     "prettier-plugin-solidity": "^1.0.0-beta.9",
@@ -78,7 +79,8 @@
     "typechain": "hardhat typechain",
     "build:ts": "tsc --project ./tsconfig.production.json",
     "clean:ts": "rimraf dist",
-    "deploy": "hardhat deploy"
+    "deploy": "hardhat deploy",
+    "run-fork": "hardhat node --network hardhat --no-deploy"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0"

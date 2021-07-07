@@ -768,7 +768,7 @@
   dependencies:
     "@ethersproject/bignumber" "^5.4.0"
 
-"@ethersproject/contracts@5.4.0", "@ethersproject/contracts@^5.0.0", "@ethersproject/contracts@^5.1.1":
+"@ethersproject/contracts@5.4.0", "@ethersproject/contracts@^5.0.0", "@ethersproject/contracts@^5.1.1", "@ethersproject/contracts@^5.4.0":
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.4.0.tgz#e05fe6bd33acc98741e27d553889ec5920078abb"
   integrity sha512-hkO3L3IhS1Z3ZtHtaAG/T87nQ7KiPV+/qnvutag35I0IkiQ8G3ZpCQ9NNOpSCzn4pWSW4CfzmtE02FcqnLI+hw==
@@ -9013,6 +9013,16 @@ ltgt@~2.1.1:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.1.3.tgz#10851a06d9964b971178441c23c9e52698eece34"
   integrity sha1-EIUaBtmWS5cReEQcI8nlJpjuzjQ=
+
+mainnet-fork-helpers@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/mainnet-fork-helpers/-/mainnet-fork-helpers-0.0.1.tgz#a802390b30e00f44bd873c4636e4397feb8bceb8"
+  integrity sha512-t4JH2LRXftpO+WiMA8+fLwe/u3IY5iRmGUsut/uBWLks5q1eWmkCN3JG7/iGamsBapIF7bsD+3HAulMLQ5GfYA==
+  dependencies:
+    "@ethersproject/abstract-signer" "^5.4.0"
+    "@ethersproject/bignumber" "^5.4.0"
+    "@ethersproject/constants" "^5.4.0"
+    "@ethersproject/contracts" "^5.4.0"
 
 make-dir@^3.0.0:
   version "3.1.0"
