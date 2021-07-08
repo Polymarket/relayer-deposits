@@ -27,3 +27,24 @@ export const getContracts = (network: number): DepositContracts => {
             return MAINNET_CONTRACTS;
     }
 };
+
+export const getReceiveSigChainId = (network: number): number => {
+    if (network === 31337) return 1;
+
+    return network;
+}
+
+const MAINNET_ROUTER = "0x60A4A8A77198D798D21d8D0299DDBbb9F24353B9";
+const GOERLI_ROUTER = "0xD08ec47D0c0391E70CD458E423E6f4bD6FDC02fa";
+
+export function getRouterAddress(network: number): string {
+    switch (network) {
+        case 1:
+            return MAINNET_ROUTER;
+        case 5:
+            return GOERLI_ROUTER;
+        default:
+            console.log(`WARNING: using mainnet router address with network id ${network}`);
+            return MAINNET_ROUTER;
+    }
+}

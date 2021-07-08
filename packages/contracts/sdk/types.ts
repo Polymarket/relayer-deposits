@@ -1,4 +1,7 @@
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
+import { Provider } from "@ethersproject/abstract-provider";
+import { Transaction } from "@ethersproject/transactions";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 export type TypedDataSigner = {
     getAddress: () => Promise<string>;
@@ -14,3 +17,9 @@ export type Signature = {
     r: string;
     s: string;
 };
+
+export type DepositSigner = Signer & TypedDataSigner;
+
+export type DepositProvider = Provider & {
+    _wrapTransaction: (tx: Transaction) => TransactionResponse;
+}

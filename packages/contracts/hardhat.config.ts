@@ -31,6 +31,11 @@ const config: HardhatUserConfig = {
                 url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
             },
         },
+        localhost: {
+            chainId: ChainId.hardhat,
+            saveDeployments: false,
+            url: "http://localhost:8545"
+        },
         mainnet: { accounts, ...getRemoteNetworkConfig("mainnet") },
         goerli: { accounts, ...getRemoteNetworkConfig("goerli") },
     },

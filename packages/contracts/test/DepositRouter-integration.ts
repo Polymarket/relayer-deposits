@@ -9,7 +9,7 @@ import { splitSignature } from "@ethersproject/bytes";
 import { getReceiveSignature, getEip3009Nonce, Signature } from "../sdk";
 import { DepositRouter } from "../typechain";
 import { deploy } from "./helpers";
-import { getContracts } from "../config";
+import { getContracts } from "../sdk";
 
 const { usdc, rootChainManager, usdcPredicate } = getContracts(1);
 

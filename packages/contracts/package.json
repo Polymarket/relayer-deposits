@@ -89,6 +89,7 @@
     "@ethersproject/bytes": "^5.4.0",
     "@ethersproject/contracts": "^5.4.0",
     "@ethersproject/random": "^5.4.0",
-    "@openzeppelin/contracts": "^4.1.0"
+    "@openzeppelin/contracts": "^4.1.0",
+    "axios": "^0.21.1"
   }
 }
