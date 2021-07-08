@@ -38,13 +38,40 @@ describe("Deposit Relayer", () => {
     it("can make a deposit", async () => {
         const client = new DepositClient(wallet, "http://localhost:5555", 31337);
 
-        const res = await client.deposit(
-            ONE_USDC,
-            ONE_USDC.div(10),
+        const totalValue = ONE_USDC;
+        const fee = ONE_USDC.div(10)
+
+        const response = await client.deposit(
+            totalValue,
+            fee,
             BigNumber.from(10).pow(9),
             wallet.address,
         );
 
-        console.log({ res });
+        const receipt = await response.wait();
+
+        const iTokenPredicate = new ethers.utils.Interface([
+            "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)"
+        ]);
+
+        let parsed: any;
+        for (let i = 0; i < receipt.logs.length; i += 1) {
+            try {
+                parsed = iTokenPredicate.parseLog(receipt.logs[i]);
+            } catch (e) {}
+
+            if (parsed) break;
+        }
+
+        expect(parsed.name).to.equal("LockedERC20");
+
+        // token address
+        expect(parsed.args[2].toLowerCase()).to.equal(getContracts(1).usdc.toLowerCase());
+
+        // deposit receiver
+        expect(parsed.args[1].toLowerCase()).to.equal(wallet.address.toLowerCase());
+
+        // deposit amount
+        expect(parsed.args[3].toString()).to.equal(totalValue.sub(fee).toString());
     });
 });
