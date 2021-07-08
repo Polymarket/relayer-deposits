@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node src/server",
+    "dev": "ts-node-dev src/server",
     "build": "",
     "post-build": "yarn start",
     "lint": "eslint --config ./.eslintrc.js src"
@@ -32,6 +33,7 @@
   "devDependencies": {
     "eslint": "^7.25.0",
     "eslint-config-airbnb-typescript-prettier": "^4.2.0",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "ts-node-dev": "^1.1.8"
   }
 }

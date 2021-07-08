@@ -1,7 +1,7 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { Wallet } from "@ethersproject/wallet";
 import { splitSignature } from "@ethersproject/bytes";
-import { Signature } from "@polymarket/deposit-relayer-sdk";
+import { Signature } from "@polymarket/relayer-deposits";
 
 import getWallet from "./wallet";
 import { getDepositContract } from "./depositContract";
@@ -17,6 +17,8 @@ type DepositRequestBody = {
     gasPrice: string; // hexstring
     chainId: number;
 }
+
+const DEPOSIT_GAS = 162485;
 
 export const handleDeposit = async (ctx, next) => {
     await next();
@@ -85,10 +87,10 @@ export const handleDeposit = async (ctx, next) => {
             hash: tx.hash,
             nonce: tx.nonce,
             gasPrice: tx.gasPrice.toHexString(),
-            gas: tx.gasLimit.toHexString(),
+            gasLimit: tx.gasLimit.toHexString(),
             to: tx.to,
             value: tx.value.toHexString(),
-            input: tx.data,
+            data: tx.data,
             v: tx.v,
             r: tx.r,
             s: tx.s,

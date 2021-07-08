@@ -1,7 +1,7 @@
 import { Wallet } from "@ethersproject/wallet";
 import { Contract } from "@ethersproject/contracts";
+import { getRouterAddress } from "@polymarket/relayer-deposits";
 
-import { getRouterAddress } from "./chains";
 import depositRouterAbi from "./depositRouterAbi.json";
 
 export function getDepositContract (wallet: Wallet, chainId: number): Contract {
