@@ -53,11 +53,11 @@ export const getGasPrice = async (provider: Provider, gasStationKey?: string): P
 /**
  * @return the current price of ETH in USDC.
  */
-export const getEtherPrice = async (provider: Provider): Promise<string> => {
+export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> => {
     const ethPrice = await exchangeRate(
         "ETH",
         "USDC",
-        provider,
+        mainnetProvider,
     );
 
     if (ethPrice === null) {
@@ -67,14 +67,21 @@ export const getEtherPrice = async (provider: Provider): Promise<string> => {
     return ethPrice as string;
 };
 
+type GetFeeOptions = {
+    gasMultiplier: number; // divided by 100
+    gasStationKey: string;
+}
+
 export const getGasPriceAndFee = async (
-    provider: Provider,
-    gasStationKey?: string
+    mainnetProvider: Provider,
+    options?: Partial<GetFeeOptions>,
 ): Promise<{ gasPrice: BigNumber, fee: BigNumber }> => {
-    const [ethPrice, gasPrice] = await Promise.all([
-        getEtherPrice(provider),
-        getGasPrice(provider, gasStationKey),
+    const [ethPrice, actualGasPrice] = await Promise.all([
+        getEtherPrice(mainnetProvider),
+        getGasPrice(mainnetProvider, options?.gasStationKey),
     ]);
+
+    const gasPrice = options?.gasMultiplier ? actualGasPrice.mul(options?.gasMultiplier).div(100) : actualGasPrice;
 
     const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
 

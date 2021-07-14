@@ -1,5 +1,6 @@
 import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
 import { Provider } from "@ethersproject/abstract-provider";
+import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 
@@ -23,3 +24,5 @@ export type DepositSigner = Signer & TypedDataSigner;
 export type DepositProvider = Provider & {
     _wrapTransaction: (tx: Transaction) => TransactionResponse;
 }
+
+export type DepositResponse = TransactionResponse & { fee: BigNumber };

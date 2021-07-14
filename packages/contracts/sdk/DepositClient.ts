@@ -1,11 +1,10 @@
 import axios from "axios";
 import { BigNumber } from "@ethersproject/bignumber";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { Transaction } from "@ethersproject/transactions";
 
 import { getEip3009Nonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
-import { TypedDataSigner, DepositSigner, DepositProvider } from "./types";
+import { TypedDataSigner, DepositSigner, DepositProvider, DepositResponse } from "./types";
 import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
 import { getGasPriceAndFee } from "./fees";
@@ -36,7 +35,7 @@ export class DepositClient {
         fee: BigNumber,
         gasPrice: BigNumber,
         depositRecipient: string,
-    ): Promise<TransactionResponse> {
+    ): Promise<DepositResponse> {
         const validBefore = Math.floor(Date.now() / 1000 + 3600);
 
         const { usdc } = getContracts(this.chainId);
@@ -68,9 +67,12 @@ export class DepositClient {
             chainId: this.chainId,
         });
 
-        return this.provider._wrapTransaction(
-            this.formatTransaction(data)
-        );
+        return {
+            ...this.provider._wrapTransaction(
+                this.formatTransaction(data)
+            ),
+            fee: BigNumber.from(data.fee),
+        }
     }
 
     formatTransaction (txData: {

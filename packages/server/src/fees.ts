@@ -10,5 +10,5 @@ export const getFee = async (): Promise<{ gasPrice: BigNumber, fee: BigNumber }>
 
     const provider = new JsonRpcMultiProvider(mainnetChainData.rpcUrls);
 
-    return getGasPriceAndFee(provider, process.env.GAS_STATION_API_KEY)
+    return getGasPriceAndFee(provider, { gasStationKey: process.env.GAS_STATION_API_KEY })
 }

@@ -44,16 +44,22 @@ describe("Deposit Relayer", () => {
         const client = new DepositClient(wallet, "http://localhost:5555", 31337);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider);
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
 
         const totalValue = fee.mul(10); // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
 
-        const response = await client.deposit(
-            totalValue,
-            fee,
-            gasPrice,
-            wallet.address,
-        );
+        let response;
+        try {
+            response = await client.deposit(
+                totalValue,
+                fee,
+                gasPrice,
+                wallet.address,
+            );
+        } catch (e) {
+            console.log("error in deposit", e);
+            throw e;
+        }
 
         const receipt = await response.wait();
 
@@ -70,6 +76,8 @@ describe("Deposit Relayer", () => {
             if (parsed) break;
         }
 
+        const actualFee = BigNumber.from(response.fee);
+
         expect(parsed.name).to.equal("LockedERC20");
 
         // token address
@@ -79,6 +87,73 @@ describe("Deposit Relayer", () => {
         expect(parsed.args[1].toLowerCase()).to.equal(wallet.address.toLowerCase());
 
         // deposit amount
-        expect(parsed.args[3].toString()).to.equal(totalValue.sub(fee).toString());
+        expect(parsed.args[3].toString()).to.equal(totalValue.sub(actualFee).toString());
+    });
+
+    it("fails when fee is more than the deposit amount", async () => {
+        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+
+        try {
+            await client.deposit(
+                ONE_USDC, // total deposit amount
+                ONE_USDC.add(1), // fee
+                ONE_USDC, // gas price
+                wallet.address,
+            );
+
+            // fails if it gets here
+            expect(true).to.equal(false);
+        } catch (error) {
+            expect(error.response.status).to.equal(400);
+            expect(error.response.data).to.equal("Deposit amount must be greater than the fee");
+        }
+    });
+
+    it("fails when gas price provided to too low", async () => {
+        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+
+        const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
+
+        const totalValue = fee.mul(10);
+
+        try {
+            await client.deposit(
+                totalValue,
+                fee,
+                gasPrice.div(10),
+                wallet.address
+            );
+
+            // fails if it gets here
+            expect(true).to.equal(false);
+        } catch (error) {
+            expect(error.response.status).to.equal(400);
+            expect(error.response.data).to.equal("Gas price lower than minimum accepted.");
+        }
+    });
+
+    it("fails if the fee provided is too low", async () => {
+        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+
+        const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
+
+        const totalValue = fee.mul(10);
+
+        try {
+            await client.deposit(
+                totalValue,
+                fee.div(10),
+                gasPrice,
+                wallet.address
+            );
+
+            // fails if it gets here
+            expect(true).to.equal(false);
+        } catch (error) {
+            expect(error.response.status).to.equal(400);
+            expect(error.response.data).to.equal("Fee lower than minimum accepted fee.");
+        }
     });
 });
