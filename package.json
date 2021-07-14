@@ -8,5 +8,9 @@
   "private": true,
   "workspaces": [
       "packages/*"
-  ]
+  ],
+  "scripts": {
+      "run-fork": "yarn workspace @polymarket/relayer-deposits run-fork",
+      "start": "yarn workspace @polymarket/deposit-relay-server start"
+  }
 }

@@ -8,6 +8,7 @@ import { getReceiveSignature } from "./receiveSignature";
 import { TypedDataSigner, DepositSigner, DepositProvider } from "./types";
 import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
+import { getGasPriceAndFee } from "./fees";
 
 export class DepositClient {
     readonly httpClient: any;

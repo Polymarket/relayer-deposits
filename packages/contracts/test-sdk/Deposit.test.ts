@@ -6,7 +6,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 import axios from "axios";
 
-import { getReceiveSignature, getEip3009Nonce, getContracts, DepositClient } from "../sdk";
+import {
+    getContracts,
+    DepositClient,
+    getGasPriceAndFee,
+} from "../sdk";
+import { getRemoteNetworkConfig } from "../config";
 
 const { usdc } = getContracts(1);
 
@@ -38,13 +43,15 @@ describe("Deposit Relayer", () => {
     it("can make a deposit", async () => {
         const client = new DepositClient(wallet, "http://localhost:5555", 31337);
 
-        const totalValue = ONE_USDC;
-        const fee = ONE_USDC.div(10)
+        const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider);
+
+        const totalValue = fee.mul(10); // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
 
         const response = await client.deposit(
             totalValue,
             fee,
-            BigNumber.from(10).pow(9),
+            gasPrice,
             wallet.address,
         );
 
