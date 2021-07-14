@@ -3,9 +3,11 @@ import { Wallet } from "@ethersproject/wallet";
 import { splitSignature } from "@ethersproject/bytes";
 import { Signature } from "@polymarket/relayer-deposits";
 
-import getWallet from "./wallet";
+import { getWallet, getFee } from "./utils";
 import { getDepositContract } from "./depositContract";
-import { getFee } from "./fees";
+import NonceManager from "./NonceManager";
+
+const nonceManager = new NonceManager();
 
 type DepositRequestBody = {
     receiveSig: string;
@@ -17,7 +19,7 @@ type DepositRequestBody = {
     nonce: string; // hexstring
     gasPrice: string; // hexstring
     chainId: number;
-}
+};
 
 export const handleDeposit = async (ctx, next) => {
     await next();
@@ -58,7 +60,6 @@ export const handleDeposit = async (ctx, next) => {
     const gasPrice = calculatedGasPrice.lt(userProvidedGasPrice) ? calculatedGasPrice : userProvidedGasPrice;
 
     const gasPriceMin = calculatedGasPrice.mul(90).div(100);
-    if (BigNumber.from(gasPrice).lt(gasPriceMin)) console.log(`user gas price: ${BigNumber.from(userProvidedGasPrice)}, calculated: ${calculatedGasPrice.toString()}`)
     ctx.assert(BigNumber.from(gasPrice).gt(gasPriceMin), 400, "Gas price lower than minimum accepted.");
 
     // check that the fee is acceptable
@@ -83,6 +84,8 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     try {
+        const relayerNonce = await nonceManager.getNonce(chainId);
+
         const tx = await depositContract.deposit(
             from,
             depositRecipient,
@@ -91,10 +94,15 @@ export const handleDeposit = async (ctx, next) => {
             validBefore,
             nonce,
             sig,
-            { gasPrice },
+            {
+                gasPrice,
+                nonce: relayerNonce,
+            },
         );
 
         console.log(`Sending tx with hash ${tx.hash}`);
+
+        await nonceManager.incrementNonce(chainId);
 
         ctx.body = {
             hash: tx.hash,
@@ -115,6 +123,6 @@ export const handleDeposit = async (ctx, next) => {
         ctx.body = {
             error: error.toString(),
         };
-        ctx.status = 200;
+        ctx.status = 400;
     }
 }

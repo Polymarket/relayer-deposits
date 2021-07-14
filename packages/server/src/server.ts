@@ -5,7 +5,7 @@ import cors from "@koa/cors";
 // XXX: must import env which configures dotenv
 import "./env";
 import { getChain } from "./chains";
-import getWallet from "./wallet";
+import { getWallet } from "./utils";
 import router from "./router";
 
 const app = new Koa();

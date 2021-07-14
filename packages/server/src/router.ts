@@ -1,6 +1,6 @@
 import Router from "koa-router";
 
-import getWallet from "./wallet";
+import { getWallet } from "./utils";
 import { handleDeposit } from "./handlers";
 
 const router = new Router();
