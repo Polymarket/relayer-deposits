@@ -14,7 +14,7 @@ router.get("/", async (ctx, next) => {
 
 router.post("/deposit", handleDeposit);
 
-router.post("/relay-info", async (ctx, next) => {
+router.get("/relay-info", async (ctx, next) => {
     await next();
 
     const wallet = getWallet(1);
