@@ -11,7 +11,7 @@
   ],
   "scripts": {
       "run-fork": "yarn workspace @polymarket/relayer-deposits run-fork",
-      "build:ts": "yarn workspace @polymarket/relayer-deposits build:ts",
+      "build:ts": "yarn workspace @polymarket/relayer-deposits build",
       "start:server": "yarn workspace @polymarket/deposit-relay-server start",
       "start": "yarn build:ts && yarn start:server",
       "heroku-postbuild": "echo Skip build on Heroku"
