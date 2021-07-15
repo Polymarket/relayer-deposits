@@ -10,6 +10,7 @@ import {
     getContracts,
     DepositClient,
     getGasPriceAndFee,
+    getRouterAddress,
 } from "../sdk";
 import { getRemoteNetworkConfig } from "../config";
 
@@ -20,11 +21,16 @@ const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
 const ONE_ETH = BigNumber.from(10).pow(18);
 const ONE_USDC = BigNumber.from(10).pow(6);
 
+// must be manually changed when we set the admin to another address
+const ROUTER_ADMIN = "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3";
+
 describe("Deposit Relayer", () => {
     before(async () => {
+        const relayerWallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC as string);
+
         // fund relayer
         await fundAccountETH(
-            "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3",
+            relayerWallet.address,
             ONE_ETH.mul(100000),
             network.provider,
             ethers.getSigner,
@@ -38,6 +44,23 @@ describe("Deposit Relayer", () => {
         );
 
         await fundAccountUSDC(wallet, ONE_ETH.mul(9), usdc);
+
+        await network.provider.request({
+            method: "hardhat_impersonateAccount",
+            params: [ROUTER_ADMIN],
+        });
+
+        const routerAddress = getRouterAddress(1);
+        const router = new Contract(
+            routerAddress,
+            [
+                "function grantRole(bytes32 role, address account) external",
+                "function RELAYER_ROLE() external view returns (bytes32)"
+            ],
+            await ethers.getSigner(ROUTER_ADMIN)
+        );
+
+        await router.grantRole(await router.RELAYER_ROLE(), relayerWallet.address);
     })
 
     it("can make a deposit", async () => {
