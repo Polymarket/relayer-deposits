@@ -80,7 +80,7 @@ export const handleDeposit = async (ctx, next) => {
             sig,
         );
     } catch (e) {
-        ctx.throw(400, "Failed to estimate gas for deposit transaction. Transaction will likely fail.");
+        ctx.throw(400, `Failed to estimate gas for deposit transaction. Transaction will likely fail. Message: ${e.message}`);
     }
 
     try {
