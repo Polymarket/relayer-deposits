@@ -14,15 +14,15 @@ To save gas there's no verification on chain that the user has agreed to the dep
 import { DepositClient, getGasPriceAndFee } from "@polymarket/relayer-deposits";
 
 const { gasPrice, fee } = await getGasPriceAndFee(
-	// mainnet ethers Provider (we're using chainlink to get the eth price which isn't on goerli
-	mainnetProvider,
+  // mainnet ethers Provider (we're using chainlink to get the eth price which isn't on goerli
+  mainnetProvider,
   { gasStationKey: GAS_STATION_API_KEY }
 );
 
 const client = new DepositClient(
-	signer, // ethers Signer (must be connected to an ethers Provider)
-	"https://deposit-relayer.herokuapp.com", // relayer base url
-	1, // network id
+  signer, // ethers Signer (must be connected to an ethers Provider)
+  "https://deposit-relayer.herokuapp.com", // relayer base url
+  1, // network id
 );
 
 const txResponse = await client.deposit(
@@ -71,7 +71,7 @@ Status Code: 400
 
 Response Data: "Unsupported chainId " + chainId
 
-- The chainId passed into the constructor for DepositClient is not supported by the relayer. The supported chains are mainnet and goerli (and [localhost](http://localhost) for testing).
+- The chainId passed into the constructor for DepositClient is not supported by the relayer. The supported chains are mainnet and goerli (and localhost for testing).
 
 ### Estimate Gas Failure
 
