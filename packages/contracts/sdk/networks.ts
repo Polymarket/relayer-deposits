@@ -11,7 +11,7 @@ export const MAINNET_CONTRACTS: DepositContracts = {
 };
 
 export const GOERLI_CONTRACTS: DepositContracts = {
-    usdc: "0x9DA9Bc12b19b22d7C55798F722A1B6747AE9A710",
+    usdc: "0x6847E4fa1EE2Af7e2E62793CBdf4E39957c71C50",
     rootChainManager: "0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74",
     usdcPredicate: "0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34",
 };
