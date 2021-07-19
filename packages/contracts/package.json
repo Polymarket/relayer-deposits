@@ -1,7 +1,7 @@
 {
   "name": "@polymarket/relayer-deposits",
   "description": "Setup for writing Solidity smart contracts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "contributors": [
     {
       "name": "Sam Hatem",
