@@ -82,6 +82,7 @@
     "test:sdk": "hardhat test ./test-sdk/* --network localhost",
     "typechain": "hardhat typechain",
     "build": "tsc --project ./tsconfig.production.json",
+    "start:ts": "yarn build -w",
     "deploy": "hardhat deploy",
     "run-fork": "hardhat node --network hardhat --no-deploy"
   },
