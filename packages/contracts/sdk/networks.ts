@@ -35,7 +35,7 @@ export const getReceiveSigChainId = (network: number): number => {
 }
 
 const MAINNET_ROUTER = "0xfeEDf332689A821E24583eC9545a5A0E43188C27";
-const GOERLI_ROUTER = "0xbE02A5449f771937890fecb95C4408852D541F32";
+const GOERLI_ROUTER = "0xf018963152c5c2cA112964311e91Ff664C041087";
 
 export function getRouterAddress(network: number): string {
     switch (network) {
