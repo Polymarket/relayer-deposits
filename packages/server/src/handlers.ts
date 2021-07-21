@@ -57,7 +57,7 @@ export const handleDeposit = async (ctx, next) => {
     // check gas price is fast to prevent slow gas price from slowing deposits
     const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee();
 
-    const gasPrice = calculatedGasPrice.lt(userProvidedGasPrice) ? calculatedGasPrice : userProvidedGasPrice;
+    const gasPrice = calculatedGasPrice.lt(userProvidedGasPrice) ? calculatedGasPrice : BigNumber.from(userProvidedGasPrice);
 
     const gasPriceMin = calculatedGasPrice.mul(90).div(100);
     ctx.assert(BigNumber.from(gasPrice).gt(gasPriceMin), 400, "Gas price lower than minimum accepted.");
@@ -107,7 +107,7 @@ export const handleDeposit = async (ctx, next) => {
         ctx.body = {
             hash: tx.hash,
             nonce: tx.nonce,
-            gasPrice: tx.gasPrice.toHexString(),
+            gasPrice: gasPrice.toHexString(),
             gasLimit: tx.gasLimit.toHexString(),
             to: tx.to,
             value: tx.value.toHexString(),
