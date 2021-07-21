@@ -1,4 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
+import { _TypedDataEncoder } from "@ethersproject/hash";
 
 import type { TypedDataSigner } from "./types";
 
@@ -54,5 +55,16 @@ export const getReceiveSignature = async ({
         nonce,
     };
 
-    return signer._signTypedData(domain, types, eip712Value); // eslint-disable-line
+    const populated = await _TypedDataEncoder.resolveNames(domain, types, eip712Value, (name: string) => {
+        return signer.provider.resolveName(name);
+    });
+
+    const address = await signer.getAddress();
+
+    const message = JSON.stringify(_TypedDataEncoder.getPayload(populated.domain, types, populated.value));
+
+    return signer.provider.send("eth_signTypedData_v4", [
+        address.toLowerCase(),
+        message,
+    ]);
 };

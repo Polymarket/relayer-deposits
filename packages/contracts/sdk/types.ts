@@ -1,5 +1,6 @@
 import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
 import { Provider } from "@ethersproject/abstract-provider";
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
@@ -11,6 +12,7 @@ export type TypedDataSigner = {
         types: Record<string, Array<TypedDataField>>,
         value: Record<string, any>, // eslint-disable-line
     ) => Promise<string>;
+    provider: JsonRpcProvider;
 };
 
 export type Signature = {
