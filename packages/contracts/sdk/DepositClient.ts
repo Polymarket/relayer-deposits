@@ -4,15 +4,17 @@ import { Transaction } from "@ethersproject/transactions";
 
 import { getEip3009Nonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
-import { TypedDataSigner, DepositSigner, DepositProvider, DepositResponse } from "./types";
+import { DepositSigner, DepositProvider, DepositResponse } from "./types";
 import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
-import { getGasPriceAndFee } from "./fees";
 
 export class DepositClient {
     readonly httpClient: any;
+
     readonly chainId: number;
+
     readonly signer: DepositSigner;
+
     readonly provider: DepositProvider;
 
     constructor(signer: DepositSigner, baseURL: string, chainId: number) {
@@ -30,7 +32,7 @@ export class DepositClient {
         this.provider = signer.provider as DepositProvider;
     }
 
-    async deposit (
+    async deposit(
         value: BigNumber,
         fee: BigNumber,
         gasPrice: BigNumber,
@@ -68,14 +70,12 @@ export class DepositClient {
         });
 
         return {
-            ...this.provider._wrapTransaction(
-                this.formatTransaction(data)
-            ),
+            ...this.provider._wrapTransaction(this.formatTransaction(data)),
             fee: BigNumber.from(data.fee),
-        }
+        };
     }
 
-    formatTransaction (txData: {
+    formatTransaction(txData: {
         hash: string;
         nonce: number;
         gasPrice: string;
@@ -93,6 +93,6 @@ export class DepositClient {
             gasPrice: BigNumber.from(txData.gasPrice),
             gasLimit: BigNumber.from(txData.gasLimit),
             value: BigNumber.from(txData.value),
-        }
+        };
     }
 }

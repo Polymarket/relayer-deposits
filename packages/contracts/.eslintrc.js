@@ -6,6 +6,7 @@ module.exports = {
   },
   rules: {
     "no-console": "off",
+    "import/prefer-default-export": "off",
   },
   root: true,
   parser: '@typescript-eslint/parser',
@@ -15,5 +16,6 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    ],
+    "airbnb-typescript-prettier",
+  ],
 };
