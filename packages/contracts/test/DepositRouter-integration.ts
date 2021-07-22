@@ -6,10 +6,10 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 import { splitSignature } from "@ethersproject/bytes";
 
-import { getReceiveSignature, getEip3009Nonce, Signature } from "../sdk";
+import { JsonRpcSigner } from "@ethersproject/providers";
+import { getReceiveSignature, getEip3009Nonce, Signature, getContracts } from "../sdk";
 import { DepositRouter } from "../typechain";
-import { deploy } from "./helpers";
-import { getContracts } from "../sdk";
+import { deploy, getSignerFromWallet } from "./helpers";
 
 const { usdc, rootChainManager, usdcPredicate } = getContracts(1);
 
@@ -45,7 +45,7 @@ describe("Integration tests", function () {
         let router: DepositRouter;
         let usdcContract: Contract;
         let admin: SignerWithAddress;
-
+        let signer: JsonRpcSigner;
         let reusedReceiveSig: Signature;
 
         let fee: BigNumber;
@@ -58,6 +58,7 @@ describe("Integration tests", function () {
             router = deployment.router;
             usdcContract = deployment.usdcContract;
             admin = deployment.admin;
+            signer = getSignerFromWallet(admin, 31337);
         });
 
         it("should execute the deposit", async function () {
@@ -67,19 +68,20 @@ describe("Integration tests", function () {
             fee = ONE_USDC.div(10);
 
             const nonce = await getEip3009Nonce(admin, usdc);
-
-            const receiveSig = splitSignature(await getReceiveSignature({
-                signer: admin,
-                tokenName: "USD Coin",
-                contractVersion: "2",
-                chainId: 1,
-                verifyingContract: usdc,
-                to: router.address,
-                value,
-                nonce,
-                validBefore,
-                validAfter: 0,
-            }));
+            const receiveSig = splitSignature(
+                await getReceiveSignature({
+                    signer,
+                    tokenName: "USD Coin",
+                    contractVersion: "2",
+                    chainId: 1,
+                    verifyingContract: usdc,
+                    to: router.address,
+                    value,
+                    nonce,
+                    validBefore,
+                    validAfter: 0,
+                }),
+            );
 
             const predicate = new ethers.Contract(
                 usdcPredicate,
@@ -117,18 +119,20 @@ describe("Integration tests", function () {
 
             const nonce = await getEip3009Nonce(admin, usdc);
 
-            const receiveSig = splitSignature(await getReceiveSignature({
-                signer: admin,
-                tokenName: "USD Coin",
-                contractVersion: "2",
-                chainId: 1,
-                verifyingContract: usdc,
-                to: router.address,
-                value,
-                nonce,
-                validBefore,
-                validAfter: 0,
-            }));
+            const receiveSig = splitSignature(
+                await getReceiveSignature({
+                    signer,
+                    tokenName: "USD Coin",
+                    contractVersion: "2",
+                    chainId: 1,
+                    verifyingContract: usdc,
+                    to: router.address,
+                    value,
+                    nonce,
+                    validBefore,
+                    validAfter: 0,
+                }),
+            );
 
             await expect(
                 router.deposit(admin.address, ethers.constants.AddressZero, value, fee, validBefore, nonce, receiveSig),

@@ -1,47 +1,33 @@
 /* eslint-disable func-names */
 import { expect } from "chai";
-import { deployments, ethers, network } from "hardhat";
+import { ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { JsonRpcSigner } from "@ethersproject/providers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
-import axios from "axios";
+import { getSignerFromWallet } from "../test/helpers/utils";
 
-import {
-    getContracts,
-    DepositClient,
-    getGasPriceAndFee,
-    getRouterAddress,
-} from "../sdk";
+import { getContracts, DepositClient, getGasPriceAndFee, getRouterAddress } from "../sdk";
 import { getRemoteNetworkConfig } from "../config";
 
-const { usdc } = getContracts(1);
-
-const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
-
-const ONE_ETH = BigNumber.from(10).pow(18);
-const ONE_USDC = BigNumber.from(10).pow(6);
-
-// must be manually changed when we set the admin to another address
-const ROUTER_ADMIN = "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3";
-
 describe("Deposit Relayer", () => {
+    const { usdc } = getContracts(1);
+
+    const ONE_ETH = BigNumber.from(10).pow(18);
+    const ONE_USDC = BigNumber.from(10).pow(6);
+    const HARDHAT_NETWORK = 31337;
+
+    // must be manually changed when we set the admin to another address
+    const ROUTER_ADMIN = "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3";
+
+    const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
+    const signer: JsonRpcSigner = getSignerFromWallet(wallet, HARDHAT_NETWORK);
+
     before(async () => {
         const relayerWallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC as string);
-
         // fund relayer
-        await fundAccountETH(
-            relayerWallet.address,
-            ONE_ETH.mul(100000),
-            network.provider,
-            ethers.getSigner,
-        );
+        await fundAccountETH(relayerWallet.address, ONE_ETH.mul(100000), network.provider, ethers.getSigner);
 
-        await fundAccountETH(
-            wallet.address,
-            ONE_ETH.mul(10),
-            network.provider,
-            ethers.getSigner,
-        );
+        await fundAccountETH(wallet.address, ONE_ETH.mul(10), network.provider, ethers.getSigner);
 
         await fundAccountUSDC(wallet, ONE_ETH.mul(9), usdc);
 
@@ -55,30 +41,27 @@ describe("Deposit Relayer", () => {
             routerAddress,
             [
                 "function grantRole(bytes32 role, address account) external",
-                "function RELAYER_ROLE() external view returns (bytes32)"
+                "function RELAYER_ROLE() external view returns (bytes32)",
             ],
-            await ethers.getSigner(ROUTER_ADMIN)
+            await ethers.getSigner(ROUTER_ADMIN),
         );
 
         await router.grantRole(await router.RELAYER_ROLE(), relayerWallet.address);
-    })
+    });
 
     it("can make a deposit", async () => {
-        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
+            gasStationKey: process.env.GAS_STATION_API_KEY,
+        });
 
         const totalValue = fee.mul(10); // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
 
         let response;
         try {
-            response = await client.deposit(
-                totalValue,
-                fee,
-                gasPrice,
-                wallet.address,
-            );
+            response = await client.deposit(totalValue, fee, gasPrice, wallet.address);
         } catch (e) {
             console.log("error in deposit", e);
             throw e;
@@ -87,7 +70,7 @@ describe("Deposit Relayer", () => {
         const receipt = await response.wait();
 
         const iTokenPredicate = new ethers.utils.Interface([
-            "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)"
+            "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)",
         ]);
 
         let parsed: any;
@@ -114,7 +97,7 @@ describe("Deposit Relayer", () => {
     });
 
     it("fails when fee is more than the deposit amount", async () => {
-        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
 
         try {
             await client.deposit(
@@ -133,20 +116,17 @@ describe("Deposit Relayer", () => {
     });
 
     it("fails when gas price provided to too low", async () => {
-        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
+            gasStationKey: process.env.GAS_STATION_API_KEY,
+        });
 
         const totalValue = fee.mul(10);
 
         try {
-            await client.deposit(
-                totalValue,
-                fee,
-                gasPrice.div(10),
-                wallet.address
-            );
+            await client.deposit(totalValue, fee, gasPrice.div(10), wallet.address);
 
             // fails if it gets here
             expect(true).to.equal(false);
@@ -157,20 +137,17 @@ describe("Deposit Relayer", () => {
     });
 
     it("fails if the fee provided is too low", async () => {
-        const client = new DepositClient(wallet, "http://localhost:5555", 31337);
+        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, { gasStationKey: process.env.GAS_STATION_API_KEY });
+        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
+            gasStationKey: process.env.GAS_STATION_API_KEY,
+        });
 
         const totalValue = fee.mul(10);
 
         try {
-            await client.deposit(
-                totalValue,
-                fee.div(10),
-                gasPrice,
-                wallet.address
-            );
+            await client.deposit(totalValue, fee.div(10), gasPrice, wallet.address);
 
             // fails if it gets here
             expect(true).to.equal(false);

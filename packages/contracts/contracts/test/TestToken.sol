@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * Token and lib copied from https://github.com/CoinbaseStablecoin/eip-3009
+ * Token and openzeppelin copied from https://github.com/CoinbaseStablecoin/eip-3009
  */
 
 // ERC20 adapted from: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
 
 pragma solidity 0.6.12;
 
-import { SafeMath } from "./lib/SafeMath.sol";
-import { Address } from "./lib/Address.sol";
+import { SafeMath } from "./openzeppelin/SafeMath.sol";
+import { Address } from "./openzeppelin/Address.sol";
 
-import { IERC20Internal } from "./lib/IERC20Internal.sol";
-import { EIP3009 } from "./lib/EIP3009.sol";
-import { EIP2612 } from "./lib/EIP2612.sol";
-import { EIP712 } from "./lib/EIP712.sol";
+import { IERC20Internal } from "./openzeppelin/IERC20Internal.sol";
+import { EIP3009 } from "./openzeppelin/EIP3009.sol";
+import { EIP2612 } from "./openzeppelin/EIP2612.sol";
+import { EIP712 } from "./openzeppelin/EIP712.sol";
 
 contract TestToken is IERC20Internal, EIP3009, EIP2612 {
     using SafeMath for uint256;
