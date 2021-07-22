@@ -14,16 +14,14 @@ import { DEPOSIT_GAS, ETHER_DECIMALS, USDC_DECIMALS } from "./constants";
  * @param ethPrice The price of Ether in USDC
  */
 export const ethToUSDC = (wei: BigNumber, ethPrice: string): BigNumber =>
-    mulBN(wei, parseFloat(ethPrice)).div(
-        BigNumber.from(10).pow(ETHER_DECIMALS - USDC_DECIMALS),
-    );
+    mulBN(wei, parseFloat(ethPrice)).div(BigNumber.from(10).pow(ETHER_DECIMALS - USDC_DECIMALS));
 
 export const getGasPriceFromProvider = async (provider: Provider): Promise<BigNumber> => {
     const gasPrice = await provider.getGasPrice();
 
     // pad gas price by 20% to mimic a fast gas price
     return gasPrice.mul(120).div(100);
-}
+};
 
 /**
  * Return the current gas price as a Big Number in wei
@@ -54,11 +52,7 @@ export const getGasPrice = async (provider: Provider, gasStationKey?: string): P
  * @return the current price of ETH in USDC.
  */
 export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> => {
-    const ethPrice = await exchangeRate(
-        "ETH",
-        "USDC",
-        mainnetProvider,
-    );
+    const ethPrice = await exchangeRate("ETH", "USDC", mainnetProvider);
 
     if (ethPrice === null) {
         throw Error("Could not find ETH price");
@@ -70,12 +64,12 @@ export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> 
 type GetFeeOptions = {
     gasMultiplier: number; // divided by 100
     gasStationKey: string;
-}
+};
 
 export const getGasPriceAndFee = async (
     mainnetProvider: Provider,
     options?: Partial<GetFeeOptions>,
-): Promise<{ gasPrice: BigNumber, fee: BigNumber }> => {
+): Promise<{ gasPrice: BigNumber; fee: BigNumber }> => {
     const [ethPrice, actualGasPrice] = await Promise.all([
         getEtherPrice(mainnetProvider),
         getGasPrice(mainnetProvider, options?.gasStationKey),
@@ -88,5 +82,5 @@ export const getGasPriceAndFee = async (
     return {
         gasPrice,
         fee: gasPriceUSDC.mul(DEPOSIT_GAS),
-    }
-}
+    };
+};

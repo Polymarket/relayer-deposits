@@ -4,10 +4,11 @@ import { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { splitSignature } from "@ethersproject/bytes";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 import { getReceiveSignature, Signature } from "../sdk";
 import { DepositRouter, TestToken } from "../typechain";
-import { deploy, deployMock } from "./helpers";
+import { deploy, deployMock, getSignerFromWallet } from "./helpers";
 
 const setup = deployments.createFixture(async () => {
     const admin = await ethers.getNamedSigner("admin");
@@ -47,6 +48,7 @@ describe("Unit tests", function () {
         let router: DepositRouter;
         let testToken: TestToken;
         let admin: SignerWithAddress;
+        let signer: JsonRpcSigner;
         let tokenName: string;
         let predicateContract: string;
         let tokenVersion: string;
@@ -65,6 +67,7 @@ describe("Unit tests", function () {
             router = deployment.router;
             testToken = deployment.testToken;
             admin = deployment.admin;
+            signer = getSignerFromWallet(admin, 31337);
             tokenName = deployment.tokenName;
             predicateContract = deployment.predicateContract;
             tokenVersion = deployment.tokenVersion;
@@ -99,18 +102,20 @@ describe("Unit tests", function () {
 
             nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
-            receiveSig = splitSignature(await getReceiveSignature({
-                signer: admin,
-                tokenName,
-                contractVersion: tokenVersion,
-                chainId: 31337,
-                verifyingContract: testToken.address,
-                to: router.address,
-                value: depositAmount,
-                nonce,
-                validBefore,
-                validAfter: 0,
-            }));
+            receiveSig = splitSignature(
+                await getReceiveSignature({
+                    signer,
+                    tokenName,
+                    contractVersion: tokenVersion,
+                    chainId: 31337,
+                    verifyingContract: testToken.address,
+                    to: router.address,
+                    value: depositAmount,
+                    nonce,
+                    validBefore,
+                    validAfter: 0,
+                }),
+            );
 
             expect(
                 await router.deposit(admin.address, admin.address, depositAmount, fee, validBefore, nonce, receiveSig),
