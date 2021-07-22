@@ -50,7 +50,6 @@ describe("Deposit Relayer", () => {
     });
 
     it("can make a deposit", async () => {
-        console.log(`starting can mae a depsit`);
         const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
@@ -111,7 +110,6 @@ describe("Deposit Relayer", () => {
             // fails if it gets here
             expect(true).to.equal(false);
         } catch (error) {
-            console.log(error);
             expect(error.response.status).to.equal(400);
             expect(error.response.data).to.equal("Deposit amount must be greater than the fee");
         }
