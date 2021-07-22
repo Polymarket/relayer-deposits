@@ -32,7 +32,7 @@ export const getReceiveSigChainId = (network: number): number => {
     if (network === 31337) return 1;
 
     return network;
-}
+};
 
 const MAINNET_ROUTER = "0xfeEDf332689A821E24583eC9545a5A0E43188C27";
 const GOERLI_ROUTER = "0xf018963152c5c2cA112964311e91Ff664C041087";

@@ -1,10 +1,10 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { _TypedDataEncoder } from "@ethersproject/hash";
-
-import type { TypedDataSigner } from "./types";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 export type ReceiveParams = {
-    signer: TypedDataSigner;
+    signer: JsonRpcSigner;
     tokenName: string;
     contractVersion: string;
     chainId: number;
@@ -14,6 +14,23 @@ export type ReceiveParams = {
     nonce: string;
     validAfter: number;
     validBefore: number;
+};
+
+const sign = async (
+    signer: JsonRpcSigner,
+    domain: TypedDataDomain,
+    types: Record<string, Array<TypedDataField>>,
+    value: Record<string, any>,
+): Promise<string> => {
+    const populated = await _TypedDataEncoder.resolveNames(domain, types, value, (name: string) => {
+        return signer.provider.resolveName(name);
+    });
+
+    const address = await signer.getAddress();
+
+    const message = JSON.stringify(_TypedDataEncoder.getPayload(populated.domain, types, populated.value));
+
+    return signer.provider.send("eth_signTypedData_v4", [address.toLowerCase(), message]);
 };
 
 export const getReceiveSignature = async ({
@@ -54,17 +71,6 @@ export const getReceiveSignature = async ({
         validBefore,
         nonce,
     };
-
-    const populated = await _TypedDataEncoder.resolveNames(domain, types, eip712Value, (name: string) => {
-        return signer.provider.resolveName(name);
-    });
-
-    const address = await signer.getAddress();
-
-    const message = JSON.stringify(_TypedDataEncoder.getPayload(populated.domain, types, populated.value));
-
-    return signer.provider.send("eth_signTypedData_v4", [
-        address.toLowerCase(),
-        message,
-    ]);
+    const receiveSignature = await sign(signer, domain, types, eip712Value);
+    return receiveSignature;
 };
