@@ -4,20 +4,21 @@ import { Transaction } from "@ethersproject/transactions";
 
 import { getEip3009Nonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
-import { DepositSigner, DepositProvider, DepositResponse } from "./types";
+import { DepositProvider, DepositResponse } from "./types";
 import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 export class DepositClient {
     readonly httpClient: any;
 
     readonly chainId: number;
 
-    readonly signer: DepositSigner;
+    readonly signer: JsonRpcSigner;
 
     readonly provider: DepositProvider;
 
-    constructor(signer: DepositSigner, baseURL: string, chainId: number) {
+    constructor(signer: JsonRpcSigner, baseURL: string, chainId: number) {
         if (!signer.provider) {
             throw new Error("Signer must be connected to a provider.");
         }

@@ -1,11 +1,10 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { _TypedDataEncoder } from "@ethersproject/hash";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-
-import type { TypedDataSigner } from "./types";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 export type ReceiveParams = {
-    signer: TypedDataSigner;
+    signer: JsonRpcSigner;
     tokenName: string;
     contractVersion: string;
     chainId: number;
@@ -18,7 +17,7 @@ export type ReceiveParams = {
 };
 
 const sign = async (
-    signer: TypedDataSigner,
+    signer: JsonRpcSigner,
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, any>,

@@ -1,6 +1,6 @@
 import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
 import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { JsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 
@@ -19,8 +19,6 @@ export type Signature = {
     r: string;
     s: string;
 };
-
-export type DepositSigner = Signer & TypedDataSigner;
 
 export type DepositProvider = Provider & {
     _wrapTransaction: (tx: Transaction) => TransactionResponse;
