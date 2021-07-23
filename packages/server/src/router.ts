@@ -1,6 +1,6 @@
 import Router from "koa-router";
 
-import { getWallet } from "./utils";
+import { getSigner } from "./utils";
 import { handleDeposit } from "./handlers";
 
 const router = new Router();
@@ -17,12 +17,14 @@ router.post("/deposit", handleDeposit);
 router.get("/relay-info", async (ctx, next) => {
     await next();
 
-    const wallet = getWallet(1);
+    const signer = getSigner(1);
 
-    const balance = await wallet.provider.getBalance(wallet.address);
+    const relayAddress = await signer.getAddress();
+
+    const balance = await signer.provider.getBalance(relayAddress);
 
     ctx.body = {
-        RelayerAddress: wallet.address,
+        RelayerAddress: relayAddress,
         Balance: balance.toString(),
         Ready: true,
     };
