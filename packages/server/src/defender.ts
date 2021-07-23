@@ -9,7 +9,7 @@ export const isDefenderSetup = (network: number): boolean => {
     if (defenderChainId !== network.toString()) return false;
 
     try {
-        console.log(JSON.parse(rawCredentials));
+        JSON.parse(rawCredentials);
         return true;
     } catch (_e: any) {
         return false;
