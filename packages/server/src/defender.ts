@@ -16,8 +16,6 @@ export const isDefenderSetup = (network: number): boolean => {
     }
 }
 
-isDefenderSetup(5);
-
 export const getDefenderSigner = (network: number): DefenderRelaySigner => {
     if (!isDefenderSetup(network)) throw new Error(`Cannot get defender signer on network ${network}`);
 
