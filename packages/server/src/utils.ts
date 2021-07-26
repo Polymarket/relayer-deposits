@@ -1,9 +1,11 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { Wallet } from "@ethersproject/wallet";
+import { Signer } from "@ethersproject/abstract-signer";
 import { JsonRpcMultiProvider } from "@polymarket/multi-endpoint-provider";
 import { getGasPriceAndFee } from "@polymarket/relayer-deposits";
 
 import { getChain } from "./chains";
+import { isDefenderSetup, getDefenderSigner } from "./defender";
 
 export const getWalletWithoutProvider = (): Wallet => Wallet.fromMnemonic(process.env.MNEMONIC);
 
@@ -23,6 +25,14 @@ export const getWallet = (network: number): Wallet => {
     const wallet = getWalletWithoutProvider();
 
     return wallet.connect(provider);
+}
+
+export const getSigner = (network: number): Signer => {
+    if (isDefenderSetup(network)) {
+        return getDefenderSigner(network);
+    }
+
+    return getWallet(network);
 };
 
 export const getFee = async (): Promise<{ gasPrice: BigNumber, fee: BigNumber }> => {

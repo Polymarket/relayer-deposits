@@ -1,9 +1,9 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { Wallet } from "@ethersproject/wallet";
+import { Signer } from "@ethersproject/abstract-signer";
 import { splitSignature } from "@ethersproject/bytes";
 import { Signature } from "@polymarket/relayer-deposits";
 
-import { getWallet, getFee } from "./utils";
+import { getSigner, getFee } from "./utils";
 import { getDepositContract } from "./depositContract";
 import NonceManager from "./NonceManager";
 
@@ -37,15 +37,15 @@ export const handleDeposit = async (ctx, next) => {
 
     ctx.assert(BigNumber.from(totalValue).gt(userProvidedFee), 400, "Deposit amount must be greater than the fee");
 
-    let wallet: Wallet;
+    let signer: Signer;
     try {
         // will throw on an unsupported chainId
-        wallet = await getWallet(chainId);
+        signer = await getSigner(chainId);
     } catch (_e) {
         ctx.throw(400, "Unsupported chainId " + chainId);
     }
 
-    const depositContract = getDepositContract(wallet, chainId);
+    const depositContract = getDepositContract(signer, chainId);
 
     let sig: Signature;
     try {
@@ -86,6 +86,8 @@ export const handleDeposit = async (ctx, next) => {
     try {
         const relayerNonce = await nonceManager.getNonce(chainId);
 
+        const txOptions = relayerNonce ? { gasPrice, nonce: relayerNonce } : { gasPrice };
+
         const tx = await depositContract.deposit(
             from,
             depositRecipient,
@@ -94,10 +96,7 @@ export const handleDeposit = async (ctx, next) => {
             validBefore,
             nonce,
             sig,
-            {
-                gasPrice,
-                nonce: relayerNonce,
-            },
+            txOptions,
         );
 
         console.log(`Sending tx with hash ${tx.hash}`);

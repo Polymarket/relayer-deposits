@@ -1,6 +1,7 @@
 import { Wallet } from "@ethersproject/wallet";
 
 import { getWallet } from "./utils";
+import { isDefenderSetup } from "./defender";
 
 /*
  * If transactions are dropped, our nonce will continue incrementing so subsequent
@@ -25,19 +26,21 @@ export default class NonceManager {
         return wallet.provider.getTransactionCount(wallet.address);
     }
 
-    async setNonce(chainId): Promise<void> {
+    private async setNonce(chainId): Promise<void> {
         const curNonce = await NonceManager.currentNonce(chainId);
         this.nonces[chainId] = curNonce;
     }
 
-    async checkNonceFresh(chainId: number): Promise<void> {
+    private async checkNonceFresh(chainId: number): Promise<void> {
         const currentNonce = await NonceManager.currentNonce(chainId);
         if (this.nonces[chainId] - NONCE_STALE_THRESHOLD > currentNonce || this.nonces[chainId] < currentNonce) {
             this.nonces[chainId] = currentNonce;
         }
     }
 
-    async getNonce(chainId: number): Promise<number> {
+    async getNonce(chainId: number): Promise<number | void> {
+        if (isDefenderSetup(chainId)) return;
+
         if (!this.nonces[chainId]) {
             await this.setNonce(chainId);
         } else {
@@ -48,6 +51,8 @@ export default class NonceManager {
     }
 
     async incrementNonce(chainId): Promise<void> {
+        if (isDefenderSetup(chainId)) return;
+
         if (!this.nonces[chainId]) {
             await this.setNonce(chainId);
         }
