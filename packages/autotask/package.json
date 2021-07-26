@@ -1,0 +1,25 @@
+{
+  "name": "@polymarket/deposit-relay-autotasks",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/server",
+    "build": "tsc",
+    "post-build": "yarn start",
+    "lint": "eslint --config ./.eslintrc.js src"
+  },
+  "dependencies": {
+    "@ethersproject/abstract-signer": "^5.0.17",
+    "defender-relay-client": "^1.10.0",
+    "dotenv": "^8.2.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-typescript-prettier": "^4.2.0",
+    "prettier": "^2.2.1",
+    "ts-node-dev": "^1.1.8"
+  }
+}
