@@ -1,12 +1,17 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Config } from "./config";
 
+const getRandomRelayer = (relayers: string[]): string => {
+  const randIndex = Math.floor(Math.random() * relayers.length);
+  return relayers[randIndex];
+};
 
-export const getRecipientRelayer = async (signer: Signer, config: Config) : Promise<string> => {
-    const relayers = config.relayers.map(i=>i);
+// TODO: implement different relayer fetch functions depending on the config
+// e.g prod -> random, goerli -> lowest balance
 
-    // TODO: Fetch strategy var, 
-    //Fetches the relayer with lowest ETH balance
-
-    return relayers[0];
-}
+export const getRecipientRelayer = async (
+  signer: Signer,
+  config: Config
+): Promise<string> => {
+  return getRandomRelayer(config.relayers.map((i) => i));
+};

@@ -2,7 +2,7 @@ import { RelayerParams } from "defender-relay-client/lib/relayer";
 import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 import { getConfig, getRelayerProvider } from "./utils";
 import { claim } from "./claim";
-import { swap } from "./swap";
+import { swapAndSend } from "./swap";
 import { getRecipientRelayer } from "./relayer";
 
 export const handler = async (credentials: RelayerParams) => {
@@ -20,11 +20,11 @@ export const handler = async (credentials: RelayerParams) => {
     // Claim USDC from deposit contract
     await claim(signer, config);
 
-    // Get relayer address
-    const relayer = await getRecipientRelayer(signer, config);
+    // Get relayer address to receive ETH
+    const recieverRelayer = await getRecipientRelayer(signer, config);
 
     // Swap USDC to ETH and forward to relayer
-    await swap(signer, config, relayer);
+    await swapAndSend(signer, config, recieverRelayer);
 
     console.log(`Complete!`);
   } catch (e) {
