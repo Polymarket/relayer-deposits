@@ -5,8 +5,8 @@ import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { splitSignature } from "@ethersproject/bytes";
 import { JsonRpcSigner } from "@ethersproject/providers";
+import { getReceiveSignature, Signature } from "@polymarket/relayer-deposits";
 
-import { getReceiveSignature, Signature } from "../sdk";
 import { DepositRouter, TestToken } from "../typechain";
 import { deploy, deployMock, getSignerFromWallet } from "./helpers";
 
