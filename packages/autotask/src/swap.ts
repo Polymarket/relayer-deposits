@@ -29,21 +29,30 @@ const constructPath = async (token: Contract, router: Contract) : Promise<string
 }
 
 const swapExactTokensForETH = async (token: Contract, tokenInAmount: BigNumber, router: Contract, to: string) => {
-    console.log(`Starting swap...`)
+    console.log(`Starting swap...`);
+    
+    console.log(`tokenInAmount: ${tokenInAmount}`);
+    
     const path = await constructPath(token, router);
+    console.log(`Path: ${path}`);
 
-    const amts = router.getAmountsOut(tokenInAmount, path);
+    // Using Uniswap itself as the oracle to get expected ETH out
+    const amts = await router.getAmountsOut(tokenInAmount, path);
     const minimumETHOut: BigNumber = amts[1];
+    
+    //slippage: 1% max
+    const minETHOutWithSlippage = minimumETHOut.mul(BigNumber.from(99))
+                                .div(BigNumber.from(100));
     
     // deadline: 2 mins ahead
     const deadline = Math.floor(Date.now() / 1000) + (60 * 2);
-    console.log(`tokenInAmount: ${tokenInAmount}`);
+    
     console.log(`Minimum ETH out: ${minimumETHOut}`);
-    console.log(`1% slippage: ${minimumETHOut.mul(BigNumber.from(0.99))}`);
+    console.log(`1% slippage: ${minETHOutWithSlippage}`);
     console.log(`Deadline: ${deadline}`);
 
-    // const txn = await router.swapExactTokensForETH(tokenInAmount, minimumETHOut, path, to, deadline);
-    // await txn.wait();
+    // const txn = await router.swapExactTokensForETH(tokenInAmount, minETHOutWithSlippage, path, to, deadline);
+    // await txn.wait();    
     console.log(`Swap Complete!`);
 }
 
@@ -56,7 +65,7 @@ const swapExactTokensForETH = async (token: Contract, tokenInAmount: BigNumber, 
  */
 export const swap = async (signer: Signer, config: Config, receiver: string) => {
     const address = await signer.getAddress();
-    const usdcTokenAddress = config.depositRouter;
+    const usdcTokenAddress = config.token;
     const swapThreshold : BigNumber = config.swapThreshold;
 
     const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
@@ -65,16 +74,13 @@ export const swap = async (signer: Signer, config: Config, receiver: string) => 
     const uniswapV2Router = new Contract(UNISWAP_ROUTER, UniswapV2RouterAbi, signer);
 
     if(usdcBalanceOnSigner.lt(swapThreshold)){
-        console.log(`USDC Balance on signer ${usdcBalanceOnSigner} < swap threshold of ${swapThreshold}`)
+        console.log(`USDC Balance on signer below swap threshold! Returning..`)
         return;
     }    
 
     if(usdcBalanceOnSigner.gte(swapThreshold)){
         console.log(`Swapping ${usdcBalanceOnSigner} USDC for ETH...`);
-        
         await approve(signer, usdc, uniswapV2Router);
-        const path = [];
-
         await swapExactTokensForETH(usdc, usdcBalanceOnSigner, uniswapV2Router, receiver);
     }
 }

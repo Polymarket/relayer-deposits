@@ -5,10 +5,6 @@ import { claim } from './claim';
 import { swap } from './swap';
 import { getRecipientRelayer } from './relayer';
 
-//TODO: flow:
-//2. Admin swaps for ETH
-//3. Admin sends to relayers(which one? random? round robin? unclear.)
-
 
 export const handler = async(credentials: RelayerParams) => {
     const provider = getRelayerProvider(credentials);
