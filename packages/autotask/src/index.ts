@@ -1,29 +1,36 @@
 import { RelayerParams } from 'defender-relay-client/lib/relayer';
-import DepositContractAbi from "./abi/DepositContractAbi";
-import * as dotenv from "dotenv";
-import { Contract, ethers } from 'ethers';
-import { getRelayerSigner } from './utils';
-import ERC20Abi from './abi/ERC20';
-
-
-const DEPOSIT_CONTRACT_ADDRESS = "0xf018963152c5c2cA112964311e91Ff664C041087";
-const GOERLI_USDC_ADDRESS = "0x6847E4fa1EE2Af7e2E62793CBdf4E39957c71C50";
+import { getConfig, getRelayerProvider } from './utils';
+import { DefenderRelaySigner } from 'defender-relay-client/lib/ethers';
+import { claim } from './claim';
+import { swap } from './swap';
 
 //TODO: flow:
-//1. Claim usdc fees to admin from deposit contract if above threshold(configurable)
 //2. Admin swaps for ETH
 //3. Admin sends to relayers(which one? random? round robin? unclear.)
 
+
 export const handler = async(credentials: RelayerParams) => {
-    //TODO: stub function to test autotask...
+    const provider = getRelayerProvider(credentials);
+    const signer = new DefenderRelaySigner(credentials, provider, { speed: 'fastest' });
     
-    console.log(`In autotask handler...`);
-    const signer = getRelayerSigner(credentials);
+    const chainId = await signer.getChainId();
+    console.log(`In autotask handler function, chainid: ${chainId}...`);
+    
+    const config = getConfig(chainId);
 
-    const depositContract = new Contract(DEPOSIT_CONTRACT_ADDRESS, DepositContractAbi, signer);
-    const usdc = new Contract(GOERLI_USDC_ADDRESS, ERC20Abi, signer);
+    try{
+        // Claim USDC from deposit contract
+        await claim(signer, config);
 
-    const usdcBalance = await usdc.balanceOf(depositContract.address);
-    console.log(`USDC Balance on deposit contract: ${usdcBalance}`);
+        // Swap USDC
+        await swap(signer, config);
 
+        // Send ETH to relayer
+        // await refillRelayer();
+
+        console.log(`Complete!`)
+    } catch(e){
+        console.error("Autotask failed!");
+        console.error(e);
+    }
 }

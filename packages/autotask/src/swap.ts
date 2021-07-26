@@ -1,6 +1,9 @@
+import ERC20Abi from './abi/ERC20';
 import { BigNumber } from "@ethersproject/bignumber";
 import UniswapV2RouterAbi from "./abi/UniswapV2RouterAbi";
 import { Zero } from "@ethersproject/constants";
+import { Contract, Signer } from "ethers";
+import { Config } from "./config";
 
 /**
  * 
@@ -8,7 +11,28 @@ import { Zero } from "@ethersproject/constants";
  * @param tokenInAmount 
  * @returns 
  */
-export const swapExactTokenForETH = async (tokenInAddress: string, tokenInAmount: BigNumber): Promise<BigNumber> => {
+export const swap = async (signer: Signer, config: Config): Promise<BigNumber> => {
+    
+    const address = await signer.getAddress();
+    const usdcTokenAddress = config.depositRouter;
+    const swapThreshold : BigNumber = config.swapThreshold;
+
+    const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
+    const usdcBalanceOnSigner:BigNumber = await usdc.balanceOf(address);
+    
+    if(usdcBalanceOnSigner.lt(swapThreshold)){
+        console.log(`USDC Balance on signer ${usdcBalanceOnSigner} < swap threshold of ${swapThreshold}`)
+        return;
+    }
+
+    if(usdcBalanceOnSigner.gte(swapThreshold)){
+        console.log(`Swapping ${usdcBalanceOnSigner} USDC for ETH...`);
+
+        const path = [];
+    }
+    
+    return BigNumber.from(0);
+
     //initiialize router here with relayer signer:
     //const router = new Contract(address, abi, signer);
     //getRouter -> implement this in utils, simple switch case for now
