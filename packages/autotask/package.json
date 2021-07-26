@@ -4,8 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node src/server",
-    "build": "tsc",
+    "build": "rollup -c -d ./build",
     "post-build": "yarn start",
     "lint": "eslint --config ./.eslintrc.js src"
   },
@@ -13,6 +12,7 @@
     "@ethersproject/abstract-signer": "^5.0.17",
     "defender-relay-client": "^1.10.0",
     "dotenv": "^8.2.0",
+    "rollup": "^2.54.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
@@ -20,6 +20,12 @@
     "eslint": "^7.25.0",
     "eslint-config-airbnb-typescript-prettier": "^4.2.0",
     "prettier": "^2.2.1",
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "@rollup/plugin-typescript": "^6.1.0",
+    "@types/is-odd": "^3.0.0",
+    "builtin-modules": "^3.1.0"
   }
 }

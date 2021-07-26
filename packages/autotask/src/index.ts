@@ -14,7 +14,9 @@ const GOERLI_USDC_ADDRESS = "0x6847E4fa1EE2Af7e2E62793CBdf4E39957c71C50";
 //2. Admin swaps for ETH
 //3. Admin sends to relayers(which one? random? round robin? unclear.)
 
-async function handler(credentials: RelayerParams){
+export const handler = async(credentials: RelayerParams) => {
+    //TODO: stub function to test autotask...
+    
     console.log(`In autotask handler...`);
     const signer = getRelayerSigner(credentials);
 
