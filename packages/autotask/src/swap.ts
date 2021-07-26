@@ -30,12 +30,8 @@ const constructPath = async (token: Contract, router: Contract) : Promise<string
 
 const swapExactTokensForETH = async (token: Contract, tokenInAmount: BigNumber, router: Contract, to: string) => {
     console.log(`Starting swap...`);
-    
-    console.log(`tokenInAmount: ${tokenInAmount}`);
-    
     const path = await constructPath(token, router);
-    console.log(`Path: ${path}`);
-
+    
     // Using Uniswap itself as the oracle to get expected ETH out
     const amts = await router.getAmountsOut(tokenInAmount, path);
     const minimumETHOut: BigNumber = amts[1];
@@ -47,12 +43,13 @@ const swapExactTokensForETH = async (token: Contract, tokenInAmount: BigNumber, 
     // deadline: 2 mins ahead
     const deadline = Math.floor(Date.now() / 1000) + (60 * 2);
     
-    console.log(`Minimum ETH out: ${minimumETHOut}`);
-    console.log(`1% slippage: ${minETHOutWithSlippage}`);
+    console.log(`tokenInAmount: ${tokenInAmount}`);
+    console.log(`Path: ${path}`);
+    console.log(`Min Expected ETH out: ${minETHOutWithSlippage}`);
     console.log(`Deadline: ${deadline}`);
 
-    // const txn = await router.swapExactTokensForETH(tokenInAmount, minETHOutWithSlippage, path, to, deadline);
-    // await txn.wait();    
+    const txn = await router.swapExactTokensForETH(tokenInAmount, minETHOutWithSlippage, path, to, deadline);
+    await txn.wait();    
     console.log(`Swap Complete!`);
 }
 
