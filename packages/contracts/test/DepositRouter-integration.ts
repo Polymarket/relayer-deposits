@@ -5,9 +5,9 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 import { splitSignature } from "@ethersproject/bytes";
-
 import { JsonRpcSigner } from "@ethersproject/providers";
-import { getReceiveSignature, getEip3009Nonce, Signature, getContracts } from "../sdk";
+import { getReceiveSignature, getEip3009Nonce, Signature, getContracts } from "@polymarket/relayer-deposits";
+
 import { DepositRouter } from "../typechain";
 import { deploy, getSignerFromWallet } from "./helpers";
 

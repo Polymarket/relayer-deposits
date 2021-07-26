@@ -4,9 +4,9 @@ import { ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
-import { getSignerFromWallet } from "../test/helpers/utils";
 
-import { getContracts, DepositClient, getGasPriceAndFee, getRouterAddress } from "../sdk";
+import { getSignerFromWallet } from "../test/helpers/utils";
+import { getContracts, DepositClient, getGasPriceAndFee, getRouterAddress } from "@polymarket/relayer-deposits";
 import { getRemoteNetworkConfig } from "../config";
 
 describe("Deposit Relayer", () => {

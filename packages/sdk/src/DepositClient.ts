@@ -1,13 +1,13 @@
 import axios from "axios";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 import { getEip3009Nonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
 import { DepositProvider, DepositResponse } from "./types";
 import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
-import { JsonRpcSigner } from "@ethersproject/providers";
 
 export class DepositClient {
     readonly httpClient: any;
