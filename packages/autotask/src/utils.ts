@@ -1,7 +1,7 @@
 import { RelayerParams } from 'defender-relay-client/lib/relayer';
 import { DefenderRelayProvider } from "defender-relay-client/lib/ethers";
 import { Provider } from "@ethersproject/abstract-provider";
-import {Config, MAINNET_CONFIG, GOERLI_CONFIG, UNISWAP_ROUTER} from "./config";
+import {Config, MAINNET_CONFIG, GOERLI_CONFIG } from "./config";
 
 export const getRelayerProvider = (credentials: RelayerParams) : Provider => {
     const provider = new DefenderRelayProvider(credentials);

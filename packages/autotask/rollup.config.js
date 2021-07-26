@@ -20,6 +20,8 @@ export default {
     external: [
       ...builtins,
       'ethers',
+      '@ethersproject/bignumber',
+      '@ethersproject/abstract-provider',
       /^defender-relay-client(\/.*)?$/,
     ],
   };
