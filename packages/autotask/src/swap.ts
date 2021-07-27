@@ -81,7 +81,6 @@ export const swapAndSend = async (
 ) => {
   const address = await signer.getAddress();
   const usdcTokenAddress = config.token;
-  const { swapThreshold } = config;
 
   const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
   const usdcBalanceOnSigner: BigNumber = await usdc.balanceOf(address);
@@ -92,19 +91,12 @@ export const swapAndSend = async (
     signer
   );
 
-  if (usdcBalanceOnSigner.lt(swapThreshold)) {
-    console.log(`USDC Balance on signer below swap threshold! Returning..`);
-    return;
-  }
-
-  if (usdcBalanceOnSigner.gte(swapThreshold)) {
-    console.log(`Swapping ${usdcBalanceOnSigner} USDC for ETH...`);
-    await approve(signer, usdc, uniswapV2Router);
-    await swapExactTokensForETH(
-      usdc,
-      usdcBalanceOnSigner,
-      uniswapV2Router,
-      receiver
-    );
-  }
+  console.log(`Swapping ${usdcBalanceOnSigner} USDC for ETH...`);
+  await approve(signer, usdc, uniswapV2Router);
+  await swapExactTokensForETH(
+    usdc,
+    usdcBalanceOnSigner,
+    uniswapV2Router,
+    receiver
+  );
 };

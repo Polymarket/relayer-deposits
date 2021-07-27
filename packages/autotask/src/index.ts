@@ -21,16 +21,18 @@ export const handler = async (credentials: RelayerParams) => {
     const { relayer } = config;
     const relayerBalance = await getRelayerBalance(relayer, signer);
 
-    // Claim and forward fees to Relayer
-    // if relayer balance below balanceThreshold
-    if (relayerBalance.lte(config.balanceThreshold)) {
-      console.log(`Relayer balance < balanceThreshold, refilling relayer..`);
-      await claim(signer, config);
-
-      await swapAndSend(signer, config, relayer);
-
-      console.log(`Complete!`);
+    if (relayerBalance.gt(config.balanceThreshold)) {
+      console.log(`Relayer balance sufficient, no-op.`);
+      return;
     }
+
+    // Claim and forward fees if relayer balance below balanceThreshold
+    console.log(`Relayer balance < balanceThreshold, refilling relayer..`);
+    await claim(signer, config);
+
+    await swapAndSend(signer, config, relayer);
+
+    console.log(`Complete!`);
   } catch (e) {
     console.error("Autotask failed!");
     console.error(e);
