@@ -3,7 +3,7 @@ import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 import { getConfig, getRelayerProvider } from "./utils";
 import { claim } from "./claim";
 import { swapAndSend } from "./swap";
-import { getRecipientRelayer } from "./relayer";
+import { getRelayerBalance } from "./relayer";
 
 export const handler = async (credentials: RelayerParams) => {
   const provider = getRelayerProvider(credentials);
@@ -12,21 +12,25 @@ export const handler = async (credentials: RelayerParams) => {
   });
 
   const chainId = await signer.getChainId();
-  console.log(`In autotask handler function, chainid: ${chainId}...`);
+  console.log(`Starting autotask function, chainid: ${chainId}...`);
 
   const config = getConfig(chainId);
 
   try {
-    // Claim USDC from deposit contract
-    await claim(signer, config);
+    // Check ETH balance on Relayer
+    const { relayer } = config;
+    const relayerBalance = await getRelayerBalance(relayer, signer);
 
-    // Get relayer address to receive ETH
-    const recieverRelayer = await getRecipientRelayer(signer, config);
+    // Claim and forward fees to Relayer
+    // if relayer balance below balanceThreshold
+    if (relayerBalance.lte(config.balanceThreshold)) {
+      console.log(`Relayer balance < balanceThreshold, refilling relayer..`);
+      await claim(signer, config);
 
-    // Swap USDC to ETH and forward to relayer
-    await swapAndSend(signer, config, recieverRelayer);
+      await swapAndSend(signer, config, relayer);
 
-    console.log(`Complete!`);
+      console.log(`Complete!`);
+    }
   } catch (e) {
     console.error("Autotask failed!");
     console.error(e);

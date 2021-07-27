@@ -4,7 +4,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import ERC20Abi from "./abi/ERC20";
 import { Config } from "./config";
 import DepositContractAbi from "./abi/DepositContractAbi";
-import { TOKEN_DECIMALS } from "./constants";
+import { TOKEN_DECIMALS, USDC_CLAIMED_TOO_LOW } from "./constants";
 
 export const claim = async (signer: Signer, config: Config) => {
   const routerAddress = config.depositRouter;
@@ -19,21 +19,14 @@ export const claim = async (signer: Signer, config: Config) => {
   const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
 
   const usdcBalance: BigNumber = await usdc.balanceOf(routerAddress);
-  console.log(`USDC Balance on deposit router: ${usdcBalance}`);
+  const usdcBalanceScaled: BigNumber = usdcBalance.div(TOKEN_DECIMALS);
 
-  if (usdcBalance.lt(config.claimThreshold)) {
-    console.log(
-      `USDC Balance on router < claim threshold: ${config.claimThreshold}`
-    );
-    return;
+  if (usdcBalance.lt(USDC_CLAIMED_TOO_LOW)) {
+    console.warn(`USDC claimed is low: ${usdcBalanceScaled} USDC!`);
   }
 
-  if (usdcBalance.gte(config.claimThreshold)) {
-    console.log(
-      `Claiming ${usdcBalance.div(TOKEN_DECIMALS)} USDC from router...`
-    );
-    const txn = await routerContract.claimFees(address, usdcBalance);
-    await txn.wait();
-    console.log(`Claimed ${usdcBalance.div(TOKEN_DECIMALS)} from contract!`);
-  }
+  console.log(`Claiming ${usdcBalanceScaled} USDC from router...`);
+  const txn = await routerContract.claimFees(address, usdcBalance);
+  await txn.wait();
+  console.log(`Claimed USDC from router!`);
 };

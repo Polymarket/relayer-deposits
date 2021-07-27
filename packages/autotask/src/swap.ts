@@ -49,11 +49,10 @@ const swapExactTokensForETH = async (
     .mul(BigNumber.from(99))
     .div(BigNumber.from(100));
 
-  // deadline: 2 mins ahead
-  const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
+  // deadline: 10 mins ahead
+  const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
 
   console.log(`tokenInAmount: ${tokenInAmount}`);
-  console.log(`Path: ${path}`);
   console.log(`Min Expected ETH out: ${minETHOutWithSlippage}`);
   console.log(`Deadline: ${deadline}`);
 
