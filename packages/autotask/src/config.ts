@@ -14,7 +14,7 @@ export const GOERLI_CONFIG: Config = {
   depositRouter: "0xf018963152c5c2cA112964311e91Ff664C041087",
   balanceThreshold: ethers.utils.parseEther("0.5"),
   swapThreshold: BigNumber.from(50),
-  relayer: "0x0212ed763Bac4E60f424ef19fAa940a2F787add2",
+  relayer: "0xb6cde01b2411a1fa7e34b0d333ccb3aec7f7ac03",
 };
 
 export const MAINNET_CONFIG: Config = {
