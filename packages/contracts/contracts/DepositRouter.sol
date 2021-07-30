@@ -2,20 +2,34 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IERC20WithEIP3009.sol";
 import "./interfaces/IRootChainManager.sol";
+import "./EnumerableSet.sol";
 
-contract DepositRouter is AccessControl {
+contract DepositRouter is Ownable {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    event RelayRegistered(address indexed relay, string url);
+    event DepositRelayed(address indexed relayer, address indexed depositor, uint256 amount, uint256 fee);
+
     IRootChainManager public rootChainManager;
     IERC20WithEIP3009 public rootToken;
     address public predicateContract;
 
-    // bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    // fees for each relayer
+    mapping(address => uint256) public fees;
 
-    // keccak256("RELAYER_ROLE")
-    bytes32 public constant RELAYER_ROLE = 0xe2b7fb3b832174769106daebcfd6d1970523240dda11281102db9363b83b0dc4;
+    // stake required to become a relayer
+    uint256 public stakeAmount;
+
+    EnumerableSet.AddressSet private _relayers;
+
+    mapping(address => string) public relayerUrl;
+
+    // because stake amount can be changed by owner we need to track how much each staked
+    mapping(address => uint256) public relayerStake;
 
     struct Sig {
         uint8 v;
@@ -27,8 +41,8 @@ contract DepositRouter is AccessControl {
         IERC20WithEIP3009 _rootToken,
         IRootChainManager _rootChainManager,
         address _predicateContract,
-        address admin,
-        address[] memory relayers
+        address owner,
+        uint256 _stakeAmount
     ) {
         rootToken = _rootToken;
         rootChainManager = _rootChainManager;
@@ -37,15 +51,42 @@ contract DepositRouter is AccessControl {
         // hit predicateContract with a max approval
         rootToken.approve(predicateContract, type(uint256).max);
 
-        // set up roles
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        stakeAmount = _stakeAmount;
 
-        for (uint256 i = 0; i < relayers.length; ++i) {
-            _setupRole(RELAYER_ROLE, relayers[i]);
-        }
+        transferOwnership(owner);
     }
 
-    function claimFees(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setStakeAmount(uint256 newAmount) external onlyOwner {
+        stakeAmount = newAmount;
+    }
+
+    // register relayer
+    function register(string calldata url) external payable {
+        require(!_relayers.contains(msg.sender), "DepositRouter::register: relay already registered");
+        require(msg.value >= stakeAmount, "DepositRouter:register: insufficient deposit amount");
+
+        relayerStake[msg.sender] += stakeAmount;
+        _relayers.add(msg.sender);
+        relayerUrl[msg.sender] = url;
+
+        // refund dust eth if any
+        if (msg.value > stakeAmount) {
+            (bool success, ) = msg.sender.call{ value: msg.value - stakeAmount }("");
+            require(success, "DepositRouter:register: refund failed.");
+        }
+
+        emit RelayRegistered(msg.sender, url);
+    }
+
+    // remove relayer
+
+    // owner remove of relayer
+
+    function claimFees(address to, uint256 amount) external {
+        require(fees[msg.sender] >= amount, "DepositRouter::claimFees: sender has not claimed sufficient fees.");
+
+        fees[msg.sender] -= amount;
+
         rootToken.transfer(to, amount);
     }
 
@@ -72,7 +113,12 @@ contract DepositRouter is AccessControl {
         uint256 validBefore,
         bytes32 nonce,
         Sig calldata receiveSig
-    ) external onlyRole(RELAYER_ROLE) {
+    ) external {
+        // require relayer is registered
+        require(_relayers.contains(msg.sender), "DepositRouter::deposit: relayer is not registered");
+
+        // check eip712 signature for fee, gasPrice, msg.sender
+
         /**
          * receiveWithAuthorization rather than transferWithAuthorization to prevent front-running
          * attack where someone takes a transferWithAuthorization signature before the transaction has been mined
@@ -91,10 +137,16 @@ contract DepositRouter is AccessControl {
             receiveSig.s
         );
 
+        uint256 depositAmount = totalValue - fee;
+
         rootChainManager.depositFor(
             depositRecipient,
             address(rootToken),
-            abi.encode(totalValue - fee) // will revert on underflow
+            abi.encode(depositAmount) // will revert on underflow
         );
+
+        fees[msg.sender] += fee;
+
+        emit DepositRelayed(msg.sender, from, depositAmount, fee);
     }
 }
