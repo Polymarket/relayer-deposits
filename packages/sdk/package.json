@@ -17,6 +17,7 @@
     }
   ],
   "dependencies": {
+    "@ethersproject/bytes": "^5.4.0",
     "@polymarket/amm-maths": "^0.3.0",
     "@tomfrench/chainlink-asset-converter": "^0.1.1",
     "axios": "^0.21.1"

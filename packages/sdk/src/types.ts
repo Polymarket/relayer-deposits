@@ -1,6 +1,6 @@
-import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
-import { JsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 
