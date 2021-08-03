@@ -100,6 +100,10 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         return _relayers.values();
     }
 
+    function isRegistered(address maybeRelay) external view returns (bool) {
+        return _relayers.contains(maybeRelay);
+    }
+
     /* ADMIN FUNCTIONS */
 
     function setStakeAmount(uint256 newAmount) external onlyOwner {

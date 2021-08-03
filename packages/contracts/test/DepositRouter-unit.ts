@@ -97,6 +97,15 @@ describe("Unit tests", function () {
                     .withArgs(admin.address, url);
             });
 
+            it("isRegistered is true after registering", async () => {
+                const tx = await router.register("blah blah", { value: stakeAmount });
+                await tx.wait();
+
+                const isRegistered = await router.isRegistered(admin.address);
+
+                expect(isRegistered).to.equal(true);
+            });
+
             it("can get url of relayer", async () => {
                 const url = "url";
                 const tx = await router.register(url, { value: stakeAmount });
@@ -148,6 +157,21 @@ describe("Unit tests", function () {
 
                 const url = await router.relayerUrl(admin.address);
                 expect(url).to.equal("");
+            });
+
+            it("isRegistered is false after deregistering", async () => {
+                const tx = await router.register("some url", { value: stakeAmount });
+                await tx.wait();
+
+                let isRegistered = await router.isRegistered(admin.address);
+
+                expect(isRegistered).to.equal(true);
+
+                const dTx = await router.deregister();
+                await dTx.wait();
+
+                isRegistered = await router.isRegistered(admin.address);
+                expect(isRegistered).to.equal(false);
             });
 
             it("deregister returns the relayer stake", async () => {
