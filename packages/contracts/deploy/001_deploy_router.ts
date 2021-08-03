@@ -1,9 +1,8 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { BigNumber } from "ethers";
 
-import { getContracts } from "../sdk";
-
-const RELAYER_ADDRESS = "0x8236727B9458e11a1AB4A24bD8AE5CfeDc4c980C";
+import { getContracts } from "@polymarket/relayer-deposits";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployments, getNamedAccounts, network } = hre;
@@ -13,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     await deployments.deploy("DepositRouter", {
         from: deployer,
-        args: [usdc, rootChainManager, usdcPredicate, deployer, [RELAYER_ADDRESS]],
+        args: [usdc, rootChainManager, usdcPredicate, deployer, BigNumber.from(10).pow(16)],
         log: true,
     });
 };

@@ -6,7 +6,7 @@ export const signTypedData = async (
     signer: JsonRpcSigner,
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
-    value: Record<string, any>,
+    value: Record<string, any>, // eslint-disable-line
 ): Promise<string> => {
     const populated = await _TypedDataEncoder.resolveNames(domain, types, value, (name: string) => {
         return signer.provider.resolveName(name);

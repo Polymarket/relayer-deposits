@@ -5,8 +5,8 @@ import { BigNumber, Contract } from "ethers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 
+import { getContracts, DepositClient, getGasPriceAndFee } from "@polymarket/relayer-deposits";
 import { getSignerFromWallet } from "../test/helpers/utils";
-import { getContracts, DepositClient, getGasPriceAndFee, getRouterAddress } from "@polymarket/relayer-deposits";
 import { getRemoteNetworkConfig } from "../config";
 
 describe("Deposit Relayer", () => {
@@ -15,9 +15,6 @@ describe("Deposit Relayer", () => {
     const ONE_ETH = BigNumber.from(10).pow(18);
     const ONE_USDC = BigNumber.from(10).pow(6);
     const HARDHAT_NETWORK = 31337;
-
-    // must be manually changed when we set the admin to another address
-    const ROUTER_ADMIN = "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3";
 
     const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
     const signer: JsonRpcSigner = getSignerFromWallet(wallet, HARDHAT_NETWORK);
@@ -30,23 +27,6 @@ describe("Deposit Relayer", () => {
         await fundAccountETH(wallet.address, ONE_ETH.mul(10), network.provider, ethers.getSigner);
 
         await fundAccountUSDC(wallet, ONE_ETH.mul(9), usdc);
-
-        await network.provider.request({
-            method: "hardhat_impersonateAccount",
-            params: [ROUTER_ADMIN],
-        });
-
-        const routerAddress = getRouterAddress(1);
-        const router = new Contract(
-            routerAddress,
-            [
-                "function grantRole(bytes32 role, address account) external",
-                "function RELAYER_ROLE() external view returns (bytes32)",
-            ],
-            await ethers.getSigner(ROUTER_ADMIN),
-        );
-
-        await router.grantRole(await router.RELAYER_ROLE(), relayerWallet.address);
     });
 
     it("can make a deposit", async () => {

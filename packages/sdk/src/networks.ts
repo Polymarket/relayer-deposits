@@ -28,14 +28,14 @@ export const getContracts = (network: number): DepositContracts => {
     }
 };
 
-export const getReceiveSigChainId = (network: number): number => {
+export const getSigChainId = (network: number): number => {
     if (network === 31337) return 1;
 
     return network;
 };
 
-const MAINNET_ROUTER = "0xfeEDf332689A821E24583eC9545a5A0E43188C27";
-const GOERLI_ROUTER = "0xf018963152c5c2cA112964311e91Ff664C041087";
+const MAINNET_ROUTER = "0x560bf25650E1a692E18d9F9b0791A69a2d8b2c91";
+const GOERLI_ROUTER = "0xDa40CF60DcEDB40972A9a4DFFA81B5aCFcb88E17";
 
 export function getRouterAddress(network: number): string {
     switch (network) {

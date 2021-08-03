@@ -3,11 +3,12 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 import { JsonRpcSigner } from "@ethersproject/providers";
 
-import { getEip3009Nonce } from "./nonce";
+import { getEip3009Nonce, getDepositNonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
 import { DepositProvider, DepositResponse } from "./types";
-import { getContracts, getReceiveSigChainId, getRouterAddress } from "./networks";
+import { getContracts, getSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
+import { getDepositSignature } from "./depositSignature";
 
 export class DepositClient {
     readonly httpClient: any;
@@ -49,7 +50,7 @@ export class DepositClient {
             signer: this.signer,
             tokenName: TOKEN_NAME,
             contractVersion: TOKEN_VERSION,
-            chainId: getReceiveSigChainId(this.chainId),
+            chainId: getSigChainId(this.chainId),
             verifyingContract: usdc,
             to: getRouterAddress(this.chainId),
             value,
@@ -58,8 +59,25 @@ export class DepositClient {
             validAfter: 0,
         });
 
+        console.log("getting deposit nonce");
+
+        const depositNonce = await getDepositNonce(this.signer, this.chainId);
+
+        console.log({ depositNonce });
+
+        const depositSig = await getDepositSignature({
+            signer: this.signer,
+            chainId: getSigChainId(this.chainId),
+            verifyingContract: getRouterAddress(this.chainId),
+            depositRecipient,
+            fee,
+            gasPrice,
+            nonce: depositNonce,
+        });
+
         const { data } = await this.httpClient.post("/deposit", {
             receiveSig,
+            depositSig,
             from: await this.signer.getAddress(),
             depositRecipient,
             totalValue: value.toHexString(),
@@ -71,12 +89,12 @@ export class DepositClient {
         });
 
         return {
-            ...this.provider._wrapTransaction(this.formatTransaction(data)),
+            ...this.provider._wrapTransaction(DepositClient.formatTransaction(data)),
             fee: BigNumber.from(data.fee),
         };
     }
 
-    formatTransaction(txData: {
+    static formatTransaction(txData: {
         hash: string;
         nonce: number;
         gasPrice: string;
