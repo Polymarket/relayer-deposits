@@ -18,14 +18,17 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     /* EVENTS */
     event RegisterRelay(address indexed relay, string url);
 
-    // sender is who called the function
+    // sender is the account that called the function
     event DeregisterRelay(address indexed relay, address sender);
     event DepositRelayed(address indexed relayer, address indexed depositor, uint256 amount, uint256 fee);
 
-    /* */
+    /* EXTERNAL CONTRACTS */
+
     IRootChainManager public rootChainManager;
     IERC20WithEIP3009 public rootToken;
     address public predicateContract;
+
+    /* RELAYER INFO */
 
     // fees for each relayer
     mapping(address => uint256) public fees;
