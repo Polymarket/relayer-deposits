@@ -115,6 +115,21 @@ describe("Unit tests", function () {
                 expect(returnedUrl).to.equal(url);
             });
 
+            it("can retrieve all relayers with their urls", async () => {
+                const url = "url";
+                const response = await router.register(url, { value: stakeAmount });
+                await response.wait();
+
+                const [relayerInfo] = await router.getRelayersWithUrls();
+                const [returnedAddress, returnedUrl] = ethers.utils.defaultAbiCoder.decode(
+                    ["address", "string"],
+                    relayerInfo,
+                );
+
+                expect(returnedAddress).to.equal(admin.address);
+                expect(returnedUrl).to.equal(url);
+            });
+
             it("relayer can be viewed after registering", async () => {
                 const response = await router.register("insignificant url", { value: stakeAmount });
                 await response.wait();

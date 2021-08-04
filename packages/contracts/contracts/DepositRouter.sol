@@ -99,8 +99,19 @@ contract DepositRouter is Ownable, ReentrancyGuard {
 
     /* VIEW FUNCTIONS */
 
-    function getRelayers() external view returns (address[] memory) {
+    function getRelayers() public view returns (address[] memory) {
         return _relayers.values();
+    }
+
+    function getRelayersWithUrls() external view returns (bytes[] memory relayerInfo) {
+        uint256 length = _relayers.length();
+        relayerInfo = new bytes[](length);
+
+        for (uint i = 0; i < length; i++) {
+            address relayer = _relayers.at(i);
+
+            relayerInfo[i] = abi.encode(relayer, relayerUrl[relayer]);
+        }
     }
 
     function isRegistered(address maybeRelay) external view returns (bool) {
