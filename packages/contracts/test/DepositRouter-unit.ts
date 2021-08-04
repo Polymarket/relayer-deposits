@@ -296,6 +296,7 @@ describe("Unit tests", function () {
                         signer,
                         chainId: 31337,
                         verifyingContract: router.address,
+                        relayer: admin.address,
                         depositRecipient: admin.address,
                         fee,
                         gasPrice,

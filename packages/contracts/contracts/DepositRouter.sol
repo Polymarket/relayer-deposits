@@ -56,7 +56,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
 
     // The EIP-712 typehash for the deposit id struct
     bytes32 public constant DEPOSIT_TYPEHASH = keccak256(
-        "Deposit(address depositRecipient,uint256 fee,uint256 gasPrice,uint256 nonce)"
+        "Deposit(address relayer,address depositRecipient,uint256 fee,uint256 gasPrice,uint256 nonce)"
     );
 
     string public constant NAME = "Polymarket Deposit Router";
@@ -238,7 +238,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     }
 
     function _verifyDepositSig(address from, address depositRecipient, uint256 fee, Sig calldata sig) internal {
-        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, depositRecipient, fee, tx.gasprice, nonces[from]++));
+        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, msg.sender, depositRecipient, fee, tx.gasprice, nonces[from]++));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         
         require(from == ECDSA.recover(digest, sig.v, sig.r, sig.s), "DepositRouter::_verifyDepositSig: unable to verify deposit sig");
