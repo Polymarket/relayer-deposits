@@ -25,3 +25,9 @@ export type DepositProvider = Provider & {
 };
 
 export type DepositResponse = TransactionResponse & { fee: BigNumber };
+
+export type Relayer = {
+    endpoint: string;
+    fee: number;
+    address: string;
+};

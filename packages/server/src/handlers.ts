@@ -17,7 +17,7 @@ type DepositRequestBody = {
     totalValue: string; // hexstring
     fee: string; // hexstring
     validBefore: number;
-    nonce: string; // hexstring
+    receiveNonce: string; // hexstring
     gasPrice: string; // hexstring
     chainId: number;
 };
@@ -32,7 +32,7 @@ export const handleDeposit = async (ctx, next) => {
         totalValue,
         fee: userProvidedFee,
         validBefore,
-        nonce,
+        receiveNonce,
         gasPrice,
         chainId,
     } = (ctx.request.body as DepositRequestBody);
@@ -83,7 +83,7 @@ export const handleDeposit = async (ctx, next) => {
             totalValue,
             fee,
             validBefore,
-            nonce,
+            receiveNonce,
             receiveSig,
             depositSig,
             { gasPrice },
@@ -103,7 +103,7 @@ export const handleDeposit = async (ctx, next) => {
             totalValue,
             fee,
             validBefore,
-            nonce,
+            receiveNonce,
             receiveSig,
             depositSig,
             txOptions,

@@ -5,3 +5,4 @@ export * from "./networks";
 export * from "./DepositClient";
 export * from "./fees";
 export * from "./depositSignature";
+export * from "./depositContract";

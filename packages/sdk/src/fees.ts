@@ -61,26 +61,35 @@ export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> 
     return ethPrice as string;
 };
 
+export const getFeeFromGasPrice = (gasPrice: BigNumber, ethPrice: string, relayerFee: number): BigNumber => {
+    const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
+
+    const txCost = gasPriceUSDC.mul(DEPOSIT_GAS);
+    const fee = mulBN(txCost, relayerFee);
+
+    return txCost.add(fee);
+};
+
 type GetFeeOptions = {
-    gasMultiplier: number; // divided by 100
+    gasMultiplier: number;
     gasStationKey: string;
 };
 
 export const getGasPriceAndFee = async (
     mainnetProvider: Provider,
+    relayerFee: number,
     options?: Partial<GetFeeOptions>,
-): Promise<{ gasPrice: BigNumber; fee: BigNumber }> => {
+): Promise<{ gasPrice: BigNumber; ethPrice: string; fee: BigNumber }> => {
     const [ethPrice, actualGasPrice] = await Promise.all([
         getEtherPrice(mainnetProvider),
         getGasPrice(mainnetProvider, options?.gasStationKey),
     ]);
 
-    const gasPrice = options?.gasMultiplier ? actualGasPrice.mul(options?.gasMultiplier).div(100) : actualGasPrice;
-
-    const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
+    const gasPrice = options?.gasMultiplier ? mulBN(actualGasPrice, options?.gasMultiplier) : actualGasPrice;
 
     return {
         gasPrice,
-        fee: gasPriceUSDC.mul(DEPOSIT_GAS),
+        ethPrice,
+        fee: getFeeFromGasPrice(gasPrice, ethPrice, relayerFee),
     };
 };

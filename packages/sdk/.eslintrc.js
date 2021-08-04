@@ -27,5 +27,6 @@ module.exports = {
     "prefer-destructuring": "off",
     "prefer-template": "off",
     "no-underscore-dangle": "off",
+    "no-await-in-loop": "off",
   },
 };

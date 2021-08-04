@@ -1,6 +1,6 @@
 import Router from "koa-router";
 
-import { getSigner } from "./utils";
+import { getSigner, RELAYER_FEE } from "./utils";
 import { handleDeposit } from "./handlers";
 
 const router = new Router();
@@ -27,6 +27,7 @@ router.get("/relay-info", async (ctx, next) => {
         RelayerAddress: relayAddress,
         Balance: balance.toString(),
         Ready: true,
+        Fee: RELAYER_FEE,
     };
     ctx.status = 200;
 });

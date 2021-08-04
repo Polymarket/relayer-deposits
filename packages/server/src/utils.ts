@@ -7,6 +7,8 @@ import { getGasPriceAndFee } from "@polymarket/relayer-deposits";
 import { getChain } from "./chains";
 import { isDefenderSetup, getDefenderSigner } from "./defender";
 
+export const RELAYER_FEE = 0.003 // 30 basis point fee
+
 export const getWalletWithoutProvider = (): Wallet => Wallet.fromMnemonic(process.env.MNEMONIC);
 
 export const getProvider = (network: number): JsonRpcMultiProvider => {
@@ -35,11 +37,11 @@ export const getSigner = (network: number): Signer => {
     return getWallet(network);
 };
 
-export const getFee = async (): Promise<{ gasPrice: BigNumber, fee: BigNumber }> => {
+export const getFee = async (): Promise<{ gasPrice: BigNumber, fee: BigNumber, ethPrice: string }> => {
     // always use mainnet fees
     const mainnetChainData = getChain(1);
 
     const provider = new JsonRpcMultiProvider(mainnetChainData.rpcUrls);
 
-    return getGasPriceAndFee(provider, { gasStationKey: process.env.GAS_STATION_API_KEY })
+    return getGasPriceAndFee(provider, RELAYER_FEE, { gasStationKey: process.env.GAS_STATION_API_KEY })
 }

@@ -22,7 +22,7 @@ async function maybeRegister (chainId: number): Promise<void> {
     if (!isRegistered) {
         const stakeAmount = await depositContract.stakeAmount();
 
-        const tx = await depositContract.register("", { value: stakeAmount });
+        const tx = await depositContract.register("http://localhost:5555", { value: stakeAmount });
         console.log(`Registering on chainId ${chainId} with tx hash ${tx.hash}`);
     }
     } catch (e) {

@@ -4,7 +4,7 @@ import { randomBytes } from "@ethersproject/random";
 import { hexlify } from "@ethersproject/bytes";
 import { BigNumber } from "@ethersproject/bignumber";
 
-import { getRouterAddress } from "./networks";
+import { getDepositContract } from "./depositContract";
 
 export const getEip3009Nonce = async (signer: Signer, contractAddress: string): Promise<string> => {
     const eip3009Contract = new Contract(
@@ -29,11 +29,7 @@ export const getEip3009Nonce = async (signer: Signer, contractAddress: string): 
 };
 
 export const getDepositNonce = async (signer: Signer, chainId: number): Promise<BigNumber> => {
-    const depositContract = new Contract(
-        getRouterAddress(chainId),
-        ["function nonces(address) external view returns (uint256)"],
-        signer,
-    );
+    const depositContract = getDepositContract(signer, chainId);
 
     return depositContract.nonces(await signer.getAddress());
 };
