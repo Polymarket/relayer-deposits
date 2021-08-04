@@ -13,7 +13,6 @@ describe("Deposit Relayer", () => {
     const { usdc } = getContracts(1);
 
     const ONE_ETH = BigNumber.from(10).pow(18);
-    // const ONE_USDC = BigNumber.from(10).pow(6);
     const HARDHAT_NETWORK = 31337;
 
     const wallet = ethers.Wallet.createRandom().connect(ethers.provider);

@@ -228,6 +228,24 @@ describe("Unit tests", function () {
                     "DepositRouter::deregister: relay is not already registered",
                 );
             });
+
+            it("can change url", async () => {
+                let tx = await router.register("someurl", { value: stakeAmount });
+                await tx.wait();
+
+                const newUrl = "new Url";
+                tx = await router.setRelayerUrl(newUrl);
+                await tx.wait();
+
+                const returnedUrl = await router.relayerUrl(admin.address);
+                expect(returnedUrl).to.equal(newUrl);
+            });
+
+            it("fails to change url on unregistered relay", async () => {
+                await expect(router.setRelayerUrl("blah")).to.be.revertedWith(
+                    "DepositRouter::setRelayerUrl: relay must be registered to change its url",
+                );
+            });
         });
 
         describe("owner functions", function () {

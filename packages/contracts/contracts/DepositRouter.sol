@@ -147,6 +147,12 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         emit RegisterRelay(msg.sender, url);
     }
 
+    function setRelayerUrl(string calldata url) external {
+        require(_relayers.contains(msg.sender), "DepositRouter::setRelayerUrl: relay must be registered to change its url");
+
+        relayerUrl[msg.sender] = url;
+    }
+
     function deregister() external {
         _deregister(msg.sender);
     }
