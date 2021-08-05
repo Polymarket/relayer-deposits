@@ -296,7 +296,7 @@ describe("Unit tests", function () {
 
             let receiveSig: Signature;
             let depositSig: Signature;
-            let gasPrice: BigNumber;
+            let maxBlock: BigNumber;
 
             beforeEach(async () => {
                 const tx = await router.register("random url", { value: stakeAmount });
@@ -321,8 +321,9 @@ describe("Unit tests", function () {
                 );
 
                 const depositNonce = await router.nonces(admin.address);
+                const currentBlock = await ethers.provider.getBlockNumber();
 
-                gasPrice = BigNumber.from(10).pow(9).mul(10); // 10 gwei gas price
+                maxBlock = BigNumber.from(currentBlock + 10);
 
                 depositSig = splitSignature(
                     await getDepositSignature({
@@ -332,7 +333,7 @@ describe("Unit tests", function () {
                         relayer: admin.address,
                         depositRecipient: admin.address,
                         fee,
-                        gasPrice,
+                        maxBlock,
                         nonce: depositNonce,
                     }),
                 );
@@ -347,9 +348,9 @@ describe("Unit tests", function () {
                         fee,
                         validBefore,
                         nonce,
+                        maxBlock,
                         receiveSig,
                         depositSig,
-                        { gasPrice },
                     ),
                 )
                     .to.emit(testToken, "Transfer")
@@ -365,9 +366,9 @@ describe("Unit tests", function () {
                         fee,
                         validBefore,
                         nonce,
+                        maxBlock,
                         receiveSig,
                         depositSig,
-                        { gasPrice },
                     ),
                 )
                     .to.emit(router, "DepositRelayed")
@@ -387,9 +388,9 @@ describe("Unit tests", function () {
                             fee,
                             validBefore,
                             nonce,
+                            maxBlock,
                             receiveSig,
                             depositSig,
-                            { gasPrice },
                         ),
                 ).to.be.revertedWith("DepositRouter::deposit: relayer is not registered");
             });
@@ -402,9 +403,9 @@ describe("Unit tests", function () {
                     fee,
                     validBefore,
                     nonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 );
                 await tx.wait();
 
@@ -424,9 +425,9 @@ describe("Unit tests", function () {
                     fee,
                     validBefore,
                     nonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 );
                 await tx.wait();
 
@@ -436,6 +437,22 @@ describe("Unit tests", function () {
                 await expect(router.claimFees(admin.address, fee.mul(2))).to.be.revertedWith(
                     "DepositRouter::claimFees: cannot claim more fees than the accout has",
                 );
+            });
+
+            it("reverts when the max block is too low", async () => {
+                await expect(
+                    router.deposit(
+                        admin.address,
+                        admin.address,
+                        depositAmount,
+                        fee,
+                        validBefore,
+                        nonce,
+                        maxBlock.sub(100),
+                        receiveSig,
+                        depositSig,
+                    ),
+                ).to.be.revertedWith("DepositRouter::deposit: cannot relay transaction after max block");
             });
         });
     });

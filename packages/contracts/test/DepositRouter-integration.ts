@@ -59,7 +59,7 @@ describe("Integration tests", function () {
         let receiveNonce: string;
         let receiveSig: Signature;
         let depositSig: Signature;
-        let gasPrice: BigNumber;
+        let maxBlock: BigNumber;
 
         beforeEach(async function () {
             const deployment = await setup();
@@ -92,7 +92,8 @@ describe("Integration tests", function () {
                 }),
             );
 
-            gasPrice = BigNumber.from(10).pow(9).mul(10); // 10 gwei gas price
+            const currentBlock = await ethers.provider.getBlockNumber();
+            maxBlock = BigNumber.from(currentBlock + 10);
 
             const depositNonce = await router.nonces(admin.address);
 
@@ -104,7 +105,7 @@ describe("Integration tests", function () {
                     relayer: admin.address,
                     depositRecipient: admin.address,
                     fee,
-                    gasPrice,
+                    maxBlock,
                     nonce: depositNonce,
                 }),
             );
@@ -125,9 +126,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             )
                 .to.emit(predicate, "LockedERC20")
@@ -149,9 +150,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             )
                 .to.emit(predicate, "LockedERC20")
@@ -173,8 +174,6 @@ describe("Integration tests", function () {
                 }),
             );
 
-            gasPrice = BigNumber.from(10).pow(9).mul(10); // 10 gwei gas price
-
             const depositNonce = await router.nonces(admin.address);
 
             depositSig = splitSignature(
@@ -185,7 +184,7 @@ describe("Integration tests", function () {
                     relayer: admin.address,
                     depositRecipient: admin.address,
                     fee,
-                    gasPrice,
+                    maxBlock,
                     nonce: depositNonce,
                 }),
             );
@@ -198,9 +197,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             )
                 .to.emit(predicate, "LockedERC20")
@@ -215,9 +214,9 @@ describe("Integration tests", function () {
                 fee,
                 validBefore,
                 receiveNonce,
+                maxBlock,
                 receiveSig,
                 depositSig,
-                { gasPrice },
             );
             await tx.wait();
 
@@ -243,7 +242,7 @@ describe("Integration tests", function () {
                     relayer: admin.address,
                     depositRecipient: ethers.constants.AddressZero,
                     fee,
-                    gasPrice,
+                    maxBlock,
                     nonce: depositNonce,
                 }),
             );
@@ -256,9 +255,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             ).to.be.revertedWith("RootChainManager: INVALID_USER");
 
@@ -273,9 +272,9 @@ describe("Integration tests", function () {
                 fee,
                 validBefore,
                 receiveNonce,
+                maxBlock,
                 receiveSig,
                 depositSig,
-                { gasPrice },
             );
             await tx.wait();
 
@@ -287,9 +286,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             ).to.be.revertedWith("DepositRouter::_verifyDepositSig: unable to verify deposit sig");
         });
@@ -302,9 +301,9 @@ describe("Integration tests", function () {
                 fee,
                 validBefore,
                 receiveNonce,
+                maxBlock,
                 receiveSig,
                 depositSig,
-                { gasPrice },
             );
             await tx.wait();
 
@@ -318,7 +317,7 @@ describe("Integration tests", function () {
                     relayer: admin.address,
                     depositRecipient: admin.address,
                     fee,
-                    gasPrice,
+                    maxBlock,
                     nonce: depositNonce,
                 }),
             );
@@ -331,9 +330,9 @@ describe("Integration tests", function () {
                     fee,
                     validBefore,
                     receiveNonce,
+                    maxBlock,
                     receiveSig,
                     depositSig,
-                    { gasPrice },
                 ),
             ).to.be.revertedWith("FiatTokenV2: authorization is used or canceled");
         });

@@ -13,7 +13,7 @@ export type DepositSignatureParams = {
     relayer: string;
     depositRecipient: string;
     fee: BigNumber;
-    gasPrice: BigNumber;
+    maxBlock: BigNumber;
     nonce: BigNumber;
 };
 
@@ -24,7 +24,7 @@ export const getDepositSignature = async ({
     relayer,
     depositRecipient,
     fee,
-    gasPrice,
+    maxBlock,
     nonce,
 }: DepositSignatureParams): Promise<string> => {
     const domain = {
@@ -38,7 +38,7 @@ export const getDepositSignature = async ({
             { name: "relayer", type: "address" },
             { name: "depositRecipient", type: "address" },
             { name: "fee", type: "uint256" },
-            { name: "gasPrice", type: "uint256" },
+            { name: "maxBlock", type: "uint256" },
             { name: "nonce", type: "uint256" },
         ],
     };
@@ -47,7 +47,7 @@ export const getDepositSignature = async ({
         relayer,
         depositRecipient,
         fee,
-        gasPrice,
+        maxBlock,
         nonce,
     };
 

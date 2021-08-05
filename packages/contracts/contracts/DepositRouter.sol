@@ -10,8 +10,6 @@ import "./interfaces/IERC20WithEIP3009.sol";
 import "./interfaces/IRootChainManager.sol";
 import "./EnumerableSet.sol";
 
-import "hardhat/console.sol";
-
 contract DepositRouter is Ownable, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -56,7 +54,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
 
     // The EIP-712 typehash for the deposit id struct
     bytes32 public constant DEPOSIT_TYPEHASH = keccak256(
-        "Deposit(address relayer,address depositRecipient,uint256 fee,uint256 gasPrice,uint256 nonce)"
+        "Deposit(address relayer,address depositRecipient,uint256 fee,uint256 maxBlock,uint256 nonce)"
     );
 
     string public constant NAME = "Polymarket Deposit Router";
@@ -180,9 +178,12 @@ contract DepositRouter is Ownable, ReentrancyGuard {
      * @param totalValue - the amount to deposit
      * @param fee - the fee to pay for gas.
      * @param validBefore - the deadline for executing the deposit
-     * @param nonce - a unique random nonce for the deposit (NOT a sequential nonce see
+     * @param nonce - a unique random nonce for receiveWithAuthorization (NOT a sequential nonce see
      *      https://eips.ethereum.org/EIPS/eip-3009#unique-random-nonce-instead-of-sequential-nonce)
+     * @param maxBlock - the maximum block that the deposit can be included in to prevent relayers
+     *      from waiting until transaction fee decreases to submit the transaction
      * @param receiveSig - the EIP712 signature for `IERC20WithEIP3009.receiveWithAuthorization`
+     * @param depositSig - the EIP712 signature for the deposit
      */
     function deposit(
         address from,
@@ -191,14 +192,16 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         uint256 fee,
         uint256 validBefore,
         bytes32 nonce,
+        uint256 maxBlock,
         Sig calldata receiveSig,
         Sig calldata depositSig
     ) external {
         // require relayer is registered
         require(_relayers.contains(msg.sender), "DepositRouter::deposit: relayer is not registered");
+        require(block.number <= maxBlock, "DepositRouter::deposit: cannot relay transaction after max block");
 
         // verify the user has agreed to the deposit
-        _verifyDepositSig(from, depositRecipient, fee, depositSig);
+        _verifyDepositSig(from, depositRecipient, fee, maxBlock, depositSig);
 
         /**
          * receiveWithAuthorization rather than transferWithAuthorization to prevent front-running
@@ -254,8 +257,8 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         return chainId;
     }
 
-    function _verifyDepositSig(address from, address depositRecipient, uint256 fee, Sig calldata sig) internal {
-        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, msg.sender, depositRecipient, fee, tx.gasprice, nonces[from]++));
+    function _verifyDepositSig(address from, address depositRecipient, uint256 fee, uint256 maxBlock, Sig calldata sig) internal {
+        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, msg.sender, depositRecipient, fee, maxBlock, nonces[from]++));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         
         require(from == ECDSA.recover(digest, sig.v, sig.r, sig.s), "DepositRouter::_verifyDepositSig: unable to verify deposit sig");

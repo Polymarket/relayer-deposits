@@ -36,6 +36,7 @@ export class DepositClient {
         value: BigNumber,
         ethPrice: string,
         gasPrice: BigNumber,
+        maxBlock: BigNumber,
         depositRecipient: string,
         relayers: Relayer[],
     ): Promise<DepositResponse> {
@@ -70,6 +71,7 @@ export class DepositClient {
                     depositRecipient,
                     depositNonce,
                     gasPrice,
+                    maxBlock,
                     ethPrice,
                     relayer: relayers[i],
                     value,
@@ -78,6 +80,7 @@ export class DepositClient {
 
                 return depositResponse;
             } catch (error) {
+                console.log({ response: error.response, data: error.response.data });
                 let errorMessage: string;
                 if (error.response) {
                     errorMessage = `Deposit failed with status code ${error.response.status}: ${error.response.data}`;
@@ -100,6 +103,7 @@ export class DepositClient {
         depositRecipient,
         depositNonce,
         gasPrice,
+        maxBlock,
         ethPrice,
         relayer,
     }: {
@@ -110,6 +114,7 @@ export class DepositClient {
         depositRecipient: string;
         depositNonce: BigNumber;
         gasPrice: BigNumber;
+        maxBlock: BigNumber;
         ethPrice: string;
         relayer: Relayer;
     }): Promise<DepositResponse> {
@@ -124,7 +129,7 @@ export class DepositClient {
             relayer: relayer.address,
             depositRecipient,
             fee,
-            gasPrice,
+            maxBlock,
             nonce: depositNonce,
         });
 
@@ -150,7 +155,9 @@ export class DepositClient {
     static formatTransaction(txData: {
         hash: string;
         nonce: number;
-        gasPrice: string;
+        gasPrice?: string;
+        maxPriorityFeePerGas?: string;
+        maxFeePerGas?: string;
         gasLimit: string;
         to: string;
         value: string;
@@ -162,7 +169,9 @@ export class DepositClient {
     }): Transaction {
         return {
             ...txData,
-            gasPrice: BigNumber.from(txData.gasPrice),
+            gasPrice: txData.gasPrice ? BigNumber.from(txData.gasPrice) : undefined,
+            maxPriorityFeePerGas: txData.maxPriorityFeePerGas ? BigNumber.from(txData.maxPriorityFeePerGas) : undefined,
+            maxFeePerGas: txData.maxFeePerGas ? BigNumber.from(txData.maxFeePerGas) : undefined,
             gasLimit: BigNumber.from(txData.gasLimit),
             value: BigNumber.from(txData.value),
         };
