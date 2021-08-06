@@ -59,7 +59,7 @@ describe("Integration tests", function () {
         let receiveNonce: string;
         let receiveSig: Signature;
         let depositSig: Signature;
-        let maxBlock: BigNumber;
+        let maxBlock: number;
 
         beforeEach(async function () {
             const deployment = await setup();
@@ -93,7 +93,7 @@ describe("Integration tests", function () {
             );
 
             const currentBlock = await ethers.provider.getBlockNumber();
-            maxBlock = BigNumber.from(currentBlock + 10);
+            maxBlock = currentBlock + 10;
 
             const depositNonce = await router.nonces(admin.address);
 

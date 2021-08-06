@@ -4,7 +4,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 
 import { getEip3009Nonce, getDepositNonce } from "./nonce";
 import { getReceiveSignature } from "./receiveSignature";
-import { DepositProvider, DepositResponse, Relayer } from "./types";
+import { DepositProvider, DepositResponse, Relayer, RelayerFee } from "./types";
 import { getContracts, getSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
 import { getDepositSignature } from "./depositSignature";
@@ -19,9 +19,9 @@ export class DepositClient {
 
     readonly provider: DepositProvider;
 
-    readonly maxFee: number;
+    readonly maxFee: RelayerFee;
 
-    constructor(signer: JsonRpcSigner, maxFee: number, chainId: number) {
+    constructor(signer: JsonRpcSigner, maxFee: RelayerFee, chainId: number) {
         if (!signer.provider) {
             throw new Error("Signer must be connected to a provider.");
         }
@@ -36,7 +36,7 @@ export class DepositClient {
         value: BigNumber,
         ethPrice: string,
         gasPrice: BigNumber,
-        maxBlock: BigNumber,
+        maxBlock: number,
         depositRecipient: string,
         relayers: Relayer[],
     ): Promise<DepositResponse> {
@@ -114,13 +114,16 @@ export class DepositClient {
         depositRecipient: string;
         depositNonce: BigNumber;
         gasPrice: BigNumber;
-        maxBlock: BigNumber;
+        maxBlock: number;
         ethPrice: string;
         relayer: Relayer;
     }): Promise<DepositResponse> {
-        if (relayer.fee > this.maxFee) throw new Error("Relayer fee is greater than maximum fee");
+        if (relayer.fees.standardFee > this.maxFee.standardFee)
+            throw new Error("Relayer fee is greater than maximum fee");
+        if (BigNumber.from(relayer.fees.minFee).gt(this.maxFee.minFee))
+            throw new Error("Relayer minFee is greater than maximum accepted min fee");
 
-        const fee = getFeeFromGasPrice(gasPrice, ethPrice, relayer.fee);
+        const fee = getFeeFromGasPrice(gasPrice, ethPrice, relayer.fees, value);
 
         const depositSig = await getDepositSignature({
             signer: this.signer,

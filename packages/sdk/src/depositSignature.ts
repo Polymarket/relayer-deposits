@@ -13,7 +13,7 @@ export type DepositSignatureParams = {
     relayer: string;
     depositRecipient: string;
     fee: BigNumber;
-    maxBlock: BigNumber;
+    maxBlock: number;
     nonce: BigNumber;
 };
 

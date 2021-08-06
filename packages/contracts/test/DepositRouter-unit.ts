@@ -296,7 +296,7 @@ describe("Unit tests", function () {
 
             let receiveSig: Signature;
             let depositSig: Signature;
-            let maxBlock: BigNumber;
+            let maxBlock: number;
 
             beforeEach(async () => {
                 const tx = await router.register("random url", { value: stakeAmount });
@@ -323,7 +323,7 @@ describe("Unit tests", function () {
                 const depositNonce = await router.nonces(admin.address);
                 const currentBlock = await ethers.provider.getBlockNumber();
 
-                maxBlock = BigNumber.from(currentBlock + 10);
+                maxBlock = currentBlock + 10;
 
                 depositSig = splitSignature(
                     await getDepositSignature({
@@ -448,7 +448,7 @@ describe("Unit tests", function () {
                         fee,
                         validBefore,
                         nonce,
-                        maxBlock.sub(100),
+                        maxBlock - 100,
                         receiveSig,
                         depositSig,
                     ),

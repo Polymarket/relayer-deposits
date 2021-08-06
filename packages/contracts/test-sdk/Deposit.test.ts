@@ -13,6 +13,7 @@ describe("Deposit Relayer", () => {
     const { usdc } = getContracts(1);
 
     const ONE_ETH = BigNumber.from(10).pow(18);
+    const ONE_USDC = BigNumber.from(10).pow(18);
     const HARDHAT_NETWORK = 31337;
 
     const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
@@ -27,6 +28,9 @@ describe("Deposit Relayer", () => {
     let gasPrice: BigNumber;
     let ethPrice: string;
     let fee: BigNumber;
+    let totalValue: BigNumber;
+
+    let maxBlock: number;
 
     beforeEach(async () => {
         relayerWallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC as string);
@@ -39,28 +43,32 @@ describe("Deposit Relayer", () => {
 
         relayer = {
             address: relayerWallet.address,
-            fee: 0.003,
+            fees: { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3).toHexString() },
             endpoint: "http://localhost:5555",
         };
 
-        client = new DepositClient(signer, 0.003, HARDHAT_NETWORK);
+        client = new DepositClient(signer, relayer.fees, HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const feeData = await getGasPriceAndFee(mainnetProvider, 0.003, {
+
+        totalValue = ONE_USDC.mul(1000);
+
+        const feeData = await getGasPriceAndFee(mainnetProvider, relayer.fees, totalValue, {
             gasStationKey: process.env.GAS_STATION_API_KEY,
         });
 
         gasPrice = feeData.gasPrice;
         ethPrice = feeData.ethPrice;
         fee = feeData.fee;
+
+        const currentBlock = await ethers.provider.getBlockNumber();
+        maxBlock = currentBlock + 10;
     });
 
     it("can make a deposit", async () => {
-        const totalValue = fee.mul(10); // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
-
         let response;
         try {
-            response = await client.deposit(totalValue, ethPrice, gasPrice, wallet.address, [relayer]);
+            response = await client.deposit(totalValue, ethPrice, gasPrice, maxBlock, wallet.address, [relayer]);
         } catch (e) {
             console.log("error in deposit", e);
             throw e;
@@ -106,13 +114,18 @@ describe("Deposit Relayer", () => {
     // test that unresponsive relayer doesn't break it
 
     it("fails when fee is more than the deposit amount", async () => {
-        const totalValue = fee; // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
+        totalValue = fee;
 
         try {
             // fee is calculated base on ethPrice so if ethPrice is doubled so will the fee
-            await client.deposit(totalValue, (parseFloat(ethPrice) * 2).toString(), gasPrice, wallet.address, [
-                relayer,
-            ]);
+            await client.deposit(
+                totalValue,
+                (parseFloat(ethPrice) * 2).toString(),
+                gasPrice,
+                maxBlock,
+                wallet.address,
+                [relayer],
+            );
 
             // fails if it gets here
             expect(true).to.equal(false);
@@ -124,10 +137,10 @@ describe("Deposit Relayer", () => {
     });
 
     it("fails when gas price provided to too low", async () => {
-        const totalValue = fee; // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
+        totalValue = fee;
 
         try {
-            await client.deposit(totalValue, ethPrice, gasPrice.div(2), wallet.address, [relayer]);
+            await client.deposit(totalValue, ethPrice, gasPrice.div(2), maxBlock, wallet.address, [relayer]);
 
             // fails if it gets here
             expect(true).to.equal(false);
@@ -139,13 +152,18 @@ describe("Deposit Relayer", () => {
     });
 
     it("fails if the fee provided is too low", async () => {
-        const totalValue = fee.mul(2);
+        totalValue = fee.mul(2);
 
         try {
             // fee is calculated base on ethPrice so dividing the ethPrice by 2 divides the fee by 2
-            await client.deposit(totalValue, (parseFloat(ethPrice) / 2).toString(), gasPrice, wallet.address, [
-                relayer,
-            ]);
+            await client.deposit(
+                totalValue,
+                (parseFloat(ethPrice) / 2).toString(),
+                gasPrice,
+                maxBlock,
+                wallet.address,
+                [relayer],
+            );
 
             // fails if it gets here
             expect(true).to.equal(false);

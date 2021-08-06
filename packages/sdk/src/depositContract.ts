@@ -3,8 +3,9 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { Provider } from "@ethersproject/abstract-provider";
 import { defaultAbiCoder } from "@ethersproject/abi";
 
+import { BigNumber } from "@ethersproject/bignumber";
 import { getRouterAddress } from "./networks";
-import { Relayer } from "./types";
+import { Relayer, RelayerFee } from "./types";
 import { getHttpClient } from "./axios";
 
 export const getDepositContract = (signerOrProvider: Signer | Provider, chainId: number): Contract => {
@@ -18,7 +19,7 @@ export const getDepositContract = (signerOrProvider: Signer | Provider, chainId:
     );
 };
 
-export const getRelayers = async (provider: Provider, chainId: number): Promise<Relayer[]> => {
+export const getRelayers = async (provider: Provider, chainId: number, maxFees?: RelayerFee): Promise<Relayer[]> => {
     const depositContract = getDepositContract(provider, chainId);
 
     const relayInfo = await depositContract.getRelayersWithUrls();
@@ -26,13 +27,37 @@ export const getRelayers = async (provider: Provider, chainId: number): Promise<
     const relayInfoRequests = relayInfo.map(
         (relayInfo: string) =>
             new Promise(resolve => {
-                const [, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
+                const [address, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
                 getHttpClient(relayEndpoint)
                     .get("/relay-info")
                     .then((response: any) => {
+                        const relayerAddress = response?.data?.relayerAddress;
+
+                        // a relayer submitting a transaction with the wrong address will revert
+                        if (relayerAddress.toLowerCase() !== address.toLowerCase) {
+                            resolve({});
+                        }
+
+                        const fees = {
+                            standardFee: response?.data?.standardFee,
+                            minFee: response?.data?.minFee,
+                        };
+
+                        // == intended to check if null or undefined
+                        const hasFees = fees.standardFee == null || fees.minFee == null;
+
+                        const areFeesAcceptable =
+                            maxFees &&
+                            (fees.standardFee > maxFees.standardFee || BigNumber.from(fees.minFee).gt(maxFees.minFee));
+
+                        // check that relayer fees are acceptable
+                        if (!hasFees || !areFeesAcceptable) {
+                            resolve({});
+                        }
+
                         resolve({
-                            fee: response.data.Fee,
-                            address: response.data.RelayerAddress,
+                            fees,
+                            address: relayerAddress,
                             endpoint: relayEndpoint,
                         });
                     })
