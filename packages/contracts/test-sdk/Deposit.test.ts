@@ -13,7 +13,7 @@ describe("Deposit Relayer", () => {
     const { usdc } = getContracts(1);
 
     const ONE_ETH = BigNumber.from(10).pow(18);
-    const ONE_USDC = BigNumber.from(10).pow(18);
+    const ONE_USDC = BigNumber.from(10).pow(6);
     const HARDHAT_NETWORK = 31337;
 
     const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
@@ -27,8 +27,8 @@ describe("Deposit Relayer", () => {
 
     let gasPrice: BigNumber;
     let ethPrice: string;
-    let fee: BigNumber;
     let totalValue: BigNumber;
+    let fee: BigNumber;
 
     let maxBlock: number;
 
@@ -68,7 +68,14 @@ describe("Deposit Relayer", () => {
     it("can make a deposit", async () => {
         let response;
         try {
-            response = await client.deposit(totalValue, ethPrice, gasPrice, maxBlock, wallet.address, [relayer]);
+            response = await client.deposit({
+                value: totalValue,
+                ethPrice,
+                gasPrice,
+                maxBlock,
+                depositRecipient: await signer.getAddress(),
+                relayers: [relayer],
+            });
         } catch (e) {
             console.log("error in deposit", e);
             throw e;
@@ -80,11 +87,11 @@ describe("Deposit Relayer", () => {
             "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)",
         ]);
 
-        let parsed: any;
+        let parsed: any; // eslint-disable-line
         for (let i = 0; i < receipt.logs.length; i += 1) {
             try {
                 parsed = iTokenPredicate.parseLog(receipt.logs[i]);
-            } catch (e) {}
+            } catch (e) {} // eslint-disable-line
 
             if (parsed) break;
         }
@@ -111,6 +118,15 @@ describe("Deposit Relayer", () => {
         expect(initialRelayer.address).to.equal(relayer.address);
     });
 
+    it("filters out relayers when fees are unacceptable", async () => {
+        const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
+            standardFee: relayer.fees.standardFee + 0.001,
+            minFee: BigNumber.from(relayer.fees.minFee).add(1).toHexString(),
+        });
+
+        expect(relayers.length).to.equal(0);
+    });
+
     // test that unresponsive relayer doesn't break it
 
     it("fails when fee is more than the deposit amount", async () => {
@@ -118,14 +134,14 @@ describe("Deposit Relayer", () => {
 
         try {
             // fee is calculated base on ethPrice so if ethPrice is doubled so will the fee
-            await client.deposit(
-                totalValue,
-                (parseFloat(ethPrice) * 2).toString(),
+            await client.deposit({
+                value: totalValue,
+                ethPrice: (parseFloat(ethPrice) * 2).toString(),
                 gasPrice,
                 maxBlock,
-                wallet.address,
-                [relayer],
-            );
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);
@@ -140,7 +156,14 @@ describe("Deposit Relayer", () => {
         totalValue = fee;
 
         try {
-            await client.deposit(totalValue, ethPrice, gasPrice.div(2), maxBlock, wallet.address, [relayer]);
+            await client.deposit({
+                value: totalValue,
+                ethPrice,
+                gasPrice: gasPrice.div(2),
+                maxBlock,
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);
@@ -156,14 +179,14 @@ describe("Deposit Relayer", () => {
 
         try {
             // fee is calculated base on ethPrice so dividing the ethPrice by 2 divides the fee by 2
-            await client.deposit(
-                totalValue,
-                (parseFloat(ethPrice) / 2).toString(),
+            await client.deposit({
+                value: totalValue,
+                ethPrice: (parseFloat(ethPrice) / 2).toString(),
                 gasPrice,
                 maxBlock,
-                wallet.address,
-                [relayer],
-            );
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);

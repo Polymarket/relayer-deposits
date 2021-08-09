@@ -20,6 +20,7 @@ type DepositRequestBody = {
     receiveNonce: string; // hexstring
     gasPrice: string; // hexstring
     chainId: number;
+    maxBlock: number;
 };
 
 export const handleDeposit = async (ctx, next) => {
@@ -35,6 +36,7 @@ export const handleDeposit = async (ctx, next) => {
         receiveNonce,
         gasPrice,
         chainId,
+        maxBlock,
     } = (ctx.request.body as DepositRequestBody);
 
     ctx.assert(BigNumber.from(totalValue).gt(userProvidedFee), 400, "Deposit amount must be greater than the fee");
@@ -64,7 +66,7 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     // check gas price is fast to prevent slow gas price from slowing deposits
-    const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee();
+    const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee(BigNumber.from(totalValue));
 
     const gasPriceMin = calculatedGasPrice.mul(90).div(100);
     ctx.assert(BigNumber.from(gasPrice).gt(gasPriceMin), 400, "Gas price lower than minimum accepted.");
@@ -84,9 +86,9 @@ export const handleDeposit = async (ctx, next) => {
             fee,
             validBefore,
             receiveNonce,
+            maxBlock,
             receiveSig,
             depositSig,
-            { gasPrice },
         );
     } catch (e) {
         ctx.throw(400, `Failed to estimate gas for deposit transaction. Transaction will likely fail. Message: ${e.message}`);
@@ -104,6 +106,7 @@ export const handleDeposit = async (ctx, next) => {
             fee,
             validBefore,
             receiveNonce,
+            maxBlock,
             receiveSig,
             depositSig,
             txOptions,
@@ -116,8 +119,10 @@ export const handleDeposit = async (ctx, next) => {
         ctx.body = {
             hash: tx.hash,
             nonce: tx.nonce,
-            gasPrice: tx.gasPrice.toHexString(),
+            gasPrice: tx.gasPrice && tx.gasPrice.toHexString(),
             gasLimit: tx.gasLimit.toHexString(),
+            maxPriorityFeePerGas: tx.maxPriorityFeePerGas && tx.maxPriorityFeePerGas.toHexString(),
+            maxFeePerGas: tx.maxFeePerGas && tx.maxFeePerGas.toHexString(),
             to: tx.to,
             value: tx.value.toHexString(),
             data: tx.data,

@@ -32,14 +32,21 @@ export class DepositClient {
         this.maxFee = maxFee;
     }
 
-    async deposit(
-        value: BigNumber,
-        ethPrice: string,
-        gasPrice: BigNumber,
-        maxBlock: number,
-        depositRecipient: string,
-        relayers: Relayer[],
-    ): Promise<DepositResponse> {
+    async deposit({
+        value,
+        ethPrice,
+        gasPrice,
+        maxBlock,
+        depositRecipient,
+        relayers,
+    }: {
+        value: BigNumber;
+        ethPrice: string;
+        gasPrice: BigNumber;
+        maxBlock: number;
+        depositRecipient: string;
+        relayers: Relayer[];
+    }): Promise<DepositResponse> {
         const validBefore = Math.floor(Date.now() / 1000 + 3600);
 
         const { usdc } = getContracts(this.chainId);
@@ -80,7 +87,6 @@ export class DepositClient {
 
                 return depositResponse;
             } catch (error) {
-                console.log({ response: error.response, data: error.response.data });
                 let errorMessage: string;
                 if (error.response) {
                     errorMessage = `Deposit failed with status code ${error.response.status}: ${error.response.data}`;
@@ -145,6 +151,7 @@ export class DepositClient {
             fee: fee.toHexString(),
             validBefore,
             receiveNonce,
+            maxBlock,
             gasPrice: gasPrice.toHexString(),
             chainId: this.chainId,
         });

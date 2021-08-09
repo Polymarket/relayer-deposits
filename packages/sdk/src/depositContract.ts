@@ -31,13 +31,6 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                 getHttpClient(relayEndpoint)
                     .get("/relay-info")
                     .then((response: any) => {
-                        const relayerAddress = response?.data?.relayerAddress;
-
-                        // a relayer submitting a transaction with the wrong address will revert
-                        if (relayerAddress.toLowerCase() !== address.toLowerCase) {
-                            resolve({});
-                        }
-
                         const fees = {
                             standardFee: response?.data?.standardFee,
                             minFee: response?.data?.minFee,
@@ -47,8 +40,9 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                         const hasFees = fees.standardFee == null || fees.minFee == null;
 
                         const areFeesAcceptable =
-                            maxFees &&
-                            (fees.standardFee > maxFees.standardFee || BigNumber.from(fees.minFee).gt(maxFees.minFee));
+                            !maxFees ||
+                            fees.standardFee > maxFees.standardFee ||
+                            BigNumber.from(fees.minFee).gt(maxFees.minFee);
 
                         // check that relayer fees are acceptable
                         if (!hasFees || !areFeesAcceptable) {
@@ -57,7 +51,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
 
                         resolve({
                             fees,
-                            address: relayerAddress,
+                            address,
                             endpoint: relayEndpoint,
                         });
                     })

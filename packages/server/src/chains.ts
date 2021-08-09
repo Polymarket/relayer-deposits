@@ -4,10 +4,10 @@ interface Chain {
 }
 
 const chains: Chain[] = [
-//    {
-//        id: 5,
-//        rpcUrls: [`https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`],
-//    },
+    {
+        id: 5,
+        rpcUrls: [`https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`],
+    },
     {
         id: 1,
         rpcUrls: [`https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`],
