@@ -31,5 +31,5 @@ export const getEip3009Nonce = async (signer: Signer, contractAddress: string): 
 export const getDepositNonce = async (signer: Signer, chainId: number): Promise<BigNumber> => {
     const depositContract = getDepositContract(signer, chainId);
 
-    return depositContract.nonces(await signer.getAddress());
+    return depositContract.depositNonces(await signer.getAddress());
 };

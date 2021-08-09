@@ -23,7 +23,9 @@ export const getContracts = (network: number): DepositContracts => {
         case 5:
             return GOERLI_CONTRACTS;
         default:
-            console.log(`WARNING: running on network id ${network} with mainnet contract addresses.`); // eslint-disable-line
+            console.log(  // eslint-disable-line
+                `WARNING: running on network id ${network} with mainnet contract addresses. Ignore this warning if you are testing.`,
+            );
             return MAINNET_CONTRACTS;
     }
 };
@@ -34,8 +36,8 @@ export const getSigChainId = (network: number): number => {
     return network;
 };
 
-const MAINNET_ROUTER = "0x1063F2Bab0b01acF3622D9A535385bcA338162bE";
-const GOERLI_ROUTER = "0x65e2a87d4FCf250Ea4fD6f42658fef015b64A525";
+const MAINNET_ROUTER = "0xA442dE04783E5508a86B1E036B5aa1023B01217d";
+const GOERLI_ROUTER = "0xBF373e3Ec7b82bB0dd28CF3e933dBFb0e8c42d62";
 
 export function getRouterAddress(network: number): string {
     switch (network) {
@@ -44,7 +46,9 @@ export function getRouterAddress(network: number): string {
         case 5:
             return GOERLI_ROUTER;
         default:
-            console.log(`WARNING: using mainnet router address with network id ${network}`);
+            console.log( // eslint-disable-line
+                `WARNING: using mainnet router address with network id ${network}. Ignore this warning if you are testing.`,
+            );
             return MAINNET_ROUTER;
     }
 }

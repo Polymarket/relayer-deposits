@@ -409,7 +409,7 @@ describe("Unit tests", function () {
                 );
                 await tx.wait();
 
-                const claimableFees = await router.fees(admin.address);
+                const claimableFees = await router.collectedFees(admin.address);
                 expect(claimableFees.toString()).to.equal(fee.toString());
 
                 await expect(router.claimFees(admin.address, fee))
@@ -431,7 +431,7 @@ describe("Unit tests", function () {
                 );
                 await tx.wait();
 
-                const claimableFees = await router.fees(admin.address);
+                const claimableFees = await router.collectedFees(admin.address);
                 expect(claimableFees.toString()).to.equal(fee.toString());
 
                 await expect(router.claimFees(admin.address, fee.mul(2))).to.be.revertedWith(

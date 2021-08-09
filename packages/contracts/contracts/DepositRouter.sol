@@ -28,8 +28,8 @@ contract DepositRouter is Ownable, ReentrancyGuard {
 
     /* RELAYER INFO */
 
-    // fees for each relayer
-    mapping(address => uint256) public fees;
+    // collected fees for each relayer
+    mapping(address => uint256) public collectedFees;
 
     // stake required to become a relayer
     uint256 public stakeAmount;
@@ -43,7 +43,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
 
     /* EIP712 */
 
-    mapping(address => uint256) public nonces;
+    mapping(address => uint256) public depositNonces;
 
     bytes32 public domainSeparator;
 
@@ -156,10 +156,10 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     }
 
     function claimFees(address to, uint256 amount) external {
-        require(fees[msg.sender] >= amount, "DepositRouter::claimFees: cannot claim more fees than the accout has");
+        require(collectedFees[msg.sender] >= amount, "DepositRouter::claimFees: cannot claim more fees than the accout has");
 
         unchecked {
-            fees[msg.sender] -= amount;
+            collectedFees[msg.sender] -= amount;
         }
 
         rootToken.transfer(to, amount);
@@ -229,7 +229,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
             abi.encode(depositAmount) 
         );
 
-        fees[msg.sender] += fee;
+        collectedFees[msg.sender] += fee;
 
         emit DepositRelayed(msg.sender, from, depositAmount, fee);
     }
@@ -258,7 +258,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     }
 
     function _verifyDepositSig(address from, address depositRecipient, uint256 fee, uint256 maxBlock, Sig calldata sig) internal {
-        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, msg.sender, depositRecipient, fee, maxBlock, nonces[from]++));
+        bytes32 structHash = keccak256(abi.encode(DEPOSIT_TYPEHASH, msg.sender, depositRecipient, fee, maxBlock, depositNonces[from]++));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         
         require(from == ECDSA.recover(digest, sig.v, sig.r, sig.s), "DepositRouter::_verifyDepositSig: unable to verify deposit sig");

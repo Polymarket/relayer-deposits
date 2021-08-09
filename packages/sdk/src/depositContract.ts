@@ -13,7 +13,7 @@ export const getDepositContract = (signerOrProvider: Signer | Provider, chainId:
     return new Contract(
         getRouterAddress(chainId),
         [
-            "function nonces(address) external view returns (uint256)",
+            "function depositNonces(address) external view returns (uint256)",
             "function getRelayersWithUrls() external view returns (bytes[] memory)",
         ],
         signerOrProvider,
