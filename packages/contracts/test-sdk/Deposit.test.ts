@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { BigNumber, Contract, Wallet } from "ethers";
+import { BigNumber, Wallet } from "ethers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 
@@ -126,8 +126,6 @@ describe("Deposit Relayer", () => {
 
         expect(relayers.length).to.equal(0);
     });
-
-    // test that unresponsive relayer doesn't break it
 
     it("fails when fee is more than the deposit amount", async () => {
         totalValue = fee;

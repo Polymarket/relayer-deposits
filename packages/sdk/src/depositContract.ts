@@ -2,11 +2,12 @@ import { Contract } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { Provider } from "@ethersproject/abstract-provider";
 import { defaultAbiCoder } from "@ethersproject/abi";
-
 import { BigNumber } from "@ethersproject/bignumber";
+
 import { getRouterAddress } from "./networks";
 import { Relayer, RelayerFee } from "./types";
 import { getHttpClient } from "./axios";
+import { RELAY_INFO_TIMEOUT } from "./constants";
 
 export const getDepositContract = (signerOrProvider: Signer | Provider, chainId: number): Contract => {
     return new Contract(
@@ -28,7 +29,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
         (relayInfo: string) =>
             new Promise(resolve => {
                 const [address, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
-                getHttpClient(relayEndpoint)
+                getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT) // 2 second timeout
                     .get("/relay-info")
                     .then((response: any) => {
                         const fees = {
@@ -37,7 +38,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                         };
 
                         // == intended to check if null or undefined
-                        const hasFees = fees.standardFee == null || fees.minFee == null;
+                        const hasFees = fees.standardFee != null && fees.minFee != null;
 
                         const areFeesAcceptable =
                             !maxFees ||
