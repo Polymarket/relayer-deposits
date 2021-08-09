@@ -10,7 +10,7 @@
       "packages/*"
   ],
   "scripts": {
-      "run-fork": "yarn workspace @polymarket/relayer-deposits run-fork",
+      "run-fork": "yarn workspace @polymarket/deposit-router run-fork",
       "build:ts": "yarn workspace @polymarket/relayer-deposits build",
       "start:server": "yarn workspace @polymarket/deposit-relay-server start",
       "start": "yarn build:ts && yarn start:server",

@@ -1,12 +1,12 @@
 /* eslint-disable func-names */
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber, Wallet } from "ethers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { fundAccountETH, fundAccountUSDC } from "mainnet-fork-helpers";
 
+import { getContracts, DepositClient, getGasPriceAndFee, Relayer, getRelayers } from "@polymarket/relayer-deposits";
 import { getSignerFromWallet } from "../test/helpers/utils";
-import { getContracts, DepositClient, getGasPriceAndFee, getRouterAddress } from "@polymarket/relayer-deposits";
 import { getRemoteNetworkConfig } from "../config";
 
 describe("Deposit Relayer", () => {
@@ -16,14 +16,24 @@ describe("Deposit Relayer", () => {
     const ONE_USDC = BigNumber.from(10).pow(6);
     const HARDHAT_NETWORK = 31337;
 
-    // must be manually changed when we set the admin to another address
-    const ROUTER_ADMIN = "0x1C35E441b21E528Dd8385Fd41d1578bE18E247D3";
-
     const wallet = ethers.Wallet.createRandom().connect(ethers.provider);
     const signer: JsonRpcSigner = getSignerFromWallet(wallet, HARDHAT_NETWORK);
 
-    before(async () => {
-        const relayerWallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC as string);
+    let relayerWallet: Wallet;
+
+    let relayer: Relayer;
+
+    let client: DepositClient;
+
+    let gasPrice: BigNumber;
+    let ethPrice: string;
+    let totalValue: BigNumber;
+    let fee: BigNumber;
+
+    let maxBlock: number;
+
+    beforeEach(async () => {
+        relayerWallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC as string);
         // fund relayer
         await fundAccountETH(relayerWallet.address, ONE_ETH.mul(100000), network.provider, ethers.getSigner);
 
@@ -31,37 +41,41 @@ describe("Deposit Relayer", () => {
 
         await fundAccountUSDC(wallet, ONE_ETH.mul(9), usdc);
 
-        await network.provider.request({
-            method: "hardhat_impersonateAccount",
-            params: [ROUTER_ADMIN],
-        });
+        relayer = {
+            address: relayerWallet.address,
+            fees: { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3).toHexString() },
+            endpoint: "http://localhost:5555",
+        };
 
-        const routerAddress = getRouterAddress(1);
-        const router = new Contract(
-            routerAddress,
-            [
-                "function grantRole(bytes32 role, address account) external",
-                "function RELAYER_ROLE() external view returns (bytes32)",
-            ],
-            await ethers.getSigner(ROUTER_ADMIN),
-        );
-
-        await router.grantRole(await router.RELAYER_ROLE(), relayerWallet.address);
-    });
-
-    it("can make a deposit", async () => {
-        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
+        client = new DepositClient(signer, relayer.fees, HARDHAT_NETWORK);
 
         const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
+
+        totalValue = ONE_USDC.mul(1000);
+
+        const feeData = await getGasPriceAndFee(mainnetProvider, relayer.fees, totalValue, {
             gasStationKey: process.env.GAS_STATION_API_KEY,
         });
 
-        const totalValue = fee.mul(10); // deposit 10x the fee so even when gasPrices are high we always deposit more than the fee
+        gasPrice = feeData.gasPrice;
+        ethPrice = feeData.ethPrice;
+        fee = feeData.fee;
 
+        const currentBlock = await ethers.provider.getBlockNumber();
+        maxBlock = currentBlock + 10;
+    });
+
+    it("can make a deposit", async () => {
         let response;
         try {
-            response = await client.deposit(totalValue, fee, gasPrice, wallet.address);
+            response = await client.deposit({
+                value: totalValue,
+                ethPrice,
+                gasPrice,
+                maxBlock,
+                depositRecipient: await signer.getAddress(),
+                relayers: [relayer],
+            });
         } catch (e) {
             console.log("error in deposit", e);
             throw e;
@@ -73,11 +87,11 @@ describe("Deposit Relayer", () => {
             "event LockedERC20(address indexed, address indexed, address indexed, uint256 amount)",
         ]);
 
-        let parsed: any;
+        let parsed: any; // eslint-disable-line
         for (let i = 0; i < receipt.logs.length; i += 1) {
             try {
                 parsed = iTokenPredicate.parseLog(receipt.logs[i]);
-            } catch (e) {}
+            } catch (e) {} // eslint-disable-line
 
             if (parsed) break;
         }
@@ -96,64 +110,88 @@ describe("Deposit Relayer", () => {
         expect(parsed.args[3].toString()).to.equal(totalValue.sub(actualFee).toString());
     });
 
+    it("get relayers returns the relayer", async () => {
+        const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK);
+
+        const initialRelayer = relayers[0];
+
+        expect(initialRelayer.address).to.equal(relayer.address);
+    });
+
+    it("filters out relayers when fees are unacceptable", async () => {
+        const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
+            standardFee: relayer.fees.standardFee + 0.001,
+            minFee: BigNumber.from(relayer.fees.minFee).add(1).toHexString(),
+        });
+
+        expect(relayers.length).to.equal(0);
+    });
+
     it("fails when fee is more than the deposit amount", async () => {
-        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
+        totalValue = fee;
 
         try {
-            await client.deposit(
-                ONE_USDC, // total deposit amount
-                ONE_USDC.add(1), // fee
-                ONE_USDC, // gas price
-                wallet.address,
-            );
+            // fee is calculated base on ethPrice so if ethPrice is doubled so will the fee
+            await client.deposit({
+                value: totalValue,
+                ethPrice: (parseFloat(ethPrice) * 2).toString(),
+                gasPrice,
+                maxBlock,
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);
         } catch (error) {
-            expect(error.response.status).to.equal(400);
-            expect(error.response.data).to.equal("Deposit amount must be greater than the fee");
+            expect(error.errors[0]).to.equal(
+                "Deposit failed with status code 400: Deposit amount must be greater than the fee",
+            );
         }
     });
 
     it("fails when gas price provided to too low", async () => {
-        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
-
-        const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
-            gasStationKey: process.env.GAS_STATION_API_KEY,
-        });
-
-        const totalValue = fee.mul(10);
+        totalValue = fee;
 
         try {
-            await client.deposit(totalValue, fee, gasPrice.div(10), wallet.address);
+            await client.deposit({
+                value: totalValue,
+                ethPrice,
+                gasPrice: gasPrice.div(2),
+                maxBlock,
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);
         } catch (error) {
-            expect(error.response.status).to.equal(400);
-            expect(error.response.data).to.equal("Gas price lower than minimum accepted.");
+            expect(error.errors[0]).to.equal(
+                "Deposit failed with status code 400: Gas price lower than minimum accepted.",
+            );
         }
     });
 
     it("fails if the fee provided is too low", async () => {
-        const client = new DepositClient(signer, "http://localhost:5555", HARDHAT_NETWORK);
-
-        const mainnetProvider = new ethers.providers.JsonRpcProvider(getRemoteNetworkConfig("mainnet").url);
-        const { gasPrice, fee } = await getGasPriceAndFee(mainnetProvider, {
-            gasStationKey: process.env.GAS_STATION_API_KEY,
-        });
-
-        const totalValue = fee.mul(10);
+        totalValue = fee.mul(2);
 
         try {
-            await client.deposit(totalValue, fee.div(10), gasPrice, wallet.address);
+            // fee is calculated base on ethPrice so dividing the ethPrice by 2 divides the fee by 2
+            await client.deposit({
+                value: totalValue,
+                ethPrice: (parseFloat(ethPrice) / 2).toString(),
+                gasPrice,
+                maxBlock,
+                depositRecipient: wallet.address,
+                relayers: [relayer],
+            });
 
             // fails if it gets here
             expect(true).to.equal(false);
         } catch (error) {
-            expect(error.response.status).to.equal(400);
-            expect(error.response.data).to.equal("Fee lower than minimum accepted fee.");
+            expect(error.errors[0]).to.equal(
+                "Deposit failed with status code 400: Fee lower than minimum accepted fee.",
+            );
         }
     });
 });
