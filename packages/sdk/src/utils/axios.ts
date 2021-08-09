@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { DEFAULT_TIMEOUT } from "./constants";
+import { DEFAULT_TIMEOUT } from "../constants";
 
 export const getHttpClient = (baseURL: string, timeout?: number): any => {
     return axios.create({

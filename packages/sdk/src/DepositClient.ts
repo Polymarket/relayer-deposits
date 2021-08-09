@@ -2,15 +2,15 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 import { JsonRpcSigner } from "@ethersproject/providers";
 
-import { getEip3009Nonce, getDepositNonce } from "./nonce";
-import { getReceiveSignature } from "./receiveSignature";
+import { getEip3009Nonce, getDepositNonce } from "./utils/nonce";
+import { getReceiveSignature } from "./utils/receiveSignature";
 import { DepositProvider, DepositResponse, Relayer, RelayerFee } from "./types";
 import { getContracts, getSigChainId, getRouterAddress } from "./networks";
 import { TOKEN_NAME, TOKEN_VERSION } from "./constants";
-import { getDepositSignature } from "./depositSignature";
+import { getDepositSignature } from "./utils/depositSignature";
 import { getFeeFromGasPrice } from "./fees";
 import { DepositError } from "./DepositError";
-import { getHttpClient } from "./axios";
+import { getHttpClient } from "./utils/axios";
 
 export class DepositClient {
     readonly chainId: number;

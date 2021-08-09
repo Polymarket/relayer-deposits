@@ -1,24 +1,11 @@
-import { Contract } from "@ethersproject/contracts";
-import { Signer } from "@ethersproject/abstract-signer";
-import { Provider } from "@ethersproject/abstract-provider";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { BigNumber } from "@ethersproject/bignumber";
+import { Provider } from "@ethersproject/abstract-provider";
 
-import { getRouterAddress } from "./networks";
+import { getDepositContract } from "./utils";
 import { Relayer, RelayerFee } from "./types";
-import { getHttpClient } from "./axios";
+import { getHttpClient } from "./utils/axios";
 import { RELAY_INFO_TIMEOUT } from "./constants";
-
-export const getDepositContract = (signerOrProvider: Signer | Provider, chainId: number): Contract => {
-    return new Contract(
-        getRouterAddress(chainId),
-        [
-            "function depositNonces(address) external view returns (uint256)",
-            "function getRelayersWithUrls() external view returns (bytes[] memory)",
-        ],
-        signerOrProvider,
-    );
-};
 
 export const getRelayers = async (provider: Provider, chainId: number, maxFees?: RelayerFee): Promise<Relayer[]> => {
     const depositContract = getDepositContract(provider, chainId);
@@ -29,7 +16,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
         (relayInfo: string) =>
             new Promise(resolve => {
                 const [address, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
-                getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT) // 2 second timeout
+                getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT) // 4 second timeout
                     .get("/relay-info")
                     .then((response: any) => {
                         const fees = {

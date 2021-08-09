@@ -3,7 +3,7 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
 
 import { RELAY_INFO_TIMEOUT } from "../src/constants";
-import { getRelayers } from "../src/depositContract";
+import { getRelayers } from "../src/getRelayers";
 
 dotenvConfig({ path: resolve(__dirname, "../../../.env") });
 

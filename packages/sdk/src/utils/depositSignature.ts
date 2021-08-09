@@ -4,7 +4,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { _TypedDataEncoder } from "@ethersproject/hash";
 
 import { signTypedData } from "./signTypedData";
-import { DEPOSIT_CONTRACT_NAME } from "./constants";
+import { DEPOSIT_CONTRACT_NAME } from "../constants";
 
 export type DepositSignatureParams = {
     signer: JsonRpcSigner;

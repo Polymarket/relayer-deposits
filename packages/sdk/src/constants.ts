@@ -11,5 +11,5 @@ export const DEPOSIT_CONTRACT_NAME = "Polymarket Deposit Router";
 export const DEPOSIT_GAS = 233695;
 
 /* REQUEST TIMEOUTS */
-export const DEFAULT_TIMEOUT = 5000;
-export const RELAY_INFO_TIMEOUT = 2000;
+export const DEFAULT_TIMEOUT = 8000;
+export const RELAY_INFO_TIMEOUT = 4000;
