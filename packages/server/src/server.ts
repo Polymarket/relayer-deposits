@@ -3,7 +3,7 @@ import bodyParser from "koa-bodyparser";
 import cors from "@koa/cors";
 
 // XXX: must import env which configures dotenv
-import "./env";
+import { defenderChainId } from "./env";
 import { getSigner } from "./utils";
 import router from "./router";
 import { maybeRegisterAllChains } from "./depositContract";
@@ -16,7 +16,7 @@ app.use(bodyParser()).use(cors()).use(router.routes()).use(router.allowedMethods
 app.listen(port, async () => {
     console.log(`Listening on port ${port}`);
 
-    const signer = getSigner(1);
+    const signer = getSigner(defenderChainId || 1);
     const relay = await signer.getAddress();
     console.log("Relay account:", relay);
 
