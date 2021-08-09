@@ -27,7 +27,7 @@ router.get("/relay-info", async (ctx, next) => {
         relayerAddress: relayAddress,
         balance: balance.toString(),
         ready: true,
-        stardardFee: RELAYER_FEE.standardFee,
+        standardFee: RELAYER_FEE.standardFee,
         minFee: RELAYER_FEE.minFee,
     };
     ctx.status = 200;
