@@ -95,7 +95,7 @@ describe("Integration tests", function () {
             const currentBlock = await ethers.provider.getBlockNumber();
             maxBlock = currentBlock + 10;
 
-            const depositNonce = await router.nonces(admin.address);
+            const depositNonce = await router.depositNonces(admin.address);
 
             depositSig = splitSignature(
                 await getDepositSignature({
@@ -174,7 +174,7 @@ describe("Integration tests", function () {
                 }),
             );
 
-            const depositNonce = await router.nonces(admin.address);
+            const depositNonce = await router.depositNonces(admin.address);
 
             depositSig = splitSignature(
                 await getDepositSignature({
@@ -232,7 +232,7 @@ describe("Integration tests", function () {
 
             await expectZeroBalance();
 
-            const depositNonce = await router.nonces(admin.address);
+            const depositNonce = await router.depositNonces(admin.address);
 
             depositSig = splitSignature(
                 await getDepositSignature({
@@ -307,7 +307,7 @@ describe("Integration tests", function () {
             );
             await tx.wait();
 
-            const depositNonce = await router.nonces(admin.address);
+            const depositNonce = await router.depositNonces(admin.address);
 
             depositSig = splitSignature(
                 await getDepositSignature({

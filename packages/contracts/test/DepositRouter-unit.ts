@@ -320,7 +320,7 @@ describe("Unit tests", function () {
                     }),
                 );
 
-                const depositNonce = await router.nonces(admin.address);
+                const depositNonce = await router.depositNonces(admin.address);
                 const currentBlock = await ethers.provider.getBlockNumber();
 
                 maxBlock = currentBlock + 10;
