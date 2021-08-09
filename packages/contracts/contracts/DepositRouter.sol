@@ -190,7 +190,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
      * @param totalValue - the amount to deposit
      * @param fee - the fee to pay for gas.
      * @param validBefore - the deadline for executing the deposit
-     * @param nonce - a unique random nonce for receiveWithAuthorization (NOT a sequential nonce see
+     * @param receiveNonce - a unique random nonce for receiveWithAuthorization (NOT a sequential nonce see
      *      https://eips.ethereum.org/EIPS/eip-3009#unique-random-nonce-instead-of-sequential-nonce)
      * @param maxBlock - the maximum block that the deposit can be included in to prevent relayers
      *      from waiting until transaction fee decreases to submit the transaction
@@ -203,7 +203,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         uint256 totalValue,
         uint256 fee,
         uint256 validBefore,
-        bytes32 nonce,
+        bytes32 receiveNonce,
         uint256 maxBlock,
         Sig calldata receiveSig,
         Sig calldata depositSig
@@ -227,7 +227,7 @@ contract DepositRouter is Ownable, ReentrancyGuard {
             totalValue,
             0,
             validBefore,
-            nonce,
+            receiveNonce,
             receiveSig.v,
             receiveSig.r,
             receiveSig.s
