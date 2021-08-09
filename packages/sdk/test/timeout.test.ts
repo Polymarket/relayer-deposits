@@ -7,7 +7,7 @@ import { getRelayers } from "../src/getRelayers";
 
 dotenvConfig({ path: resolve(__dirname, "../../../.env") });
 
-jest.mock("../src/axios", () => {
+jest.mock("../src/utils/axios", () => {
     return {
         getHttpClient: jest.fn().mockImplementation(() => {
             return {
