@@ -41,6 +41,8 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     // because stake amount can be changed by owner we need to track how much each staked
     mapping(address => uint256) public relayerStake;
 
+    mapping(address => bool) public blacklisted;
+
     /* EIP712 */
 
     mapping(address => uint256) public depositNonces;
@@ -123,12 +125,22 @@ contract DepositRouter is Ownable, ReentrancyGuard {
     }
 
     function adminDeregister(address relay) external onlyOwner {
+        _blacklist(relay);
         _deregister(relay);
+    }
+
+    function blacklist(address relay) external onlyOwner {
+        _blacklist(relay);
+    }
+
+    function unBlacklist(address relay) external onlyOwner {
+        blacklisted[relay] = false;
     }
 
     /* RELAYER FUNCTIONS */
 
     function register(string calldata url) external payable nonReentrant {
+        require(!blacklisted[msg.sender], "DepositRouter::register: relay has been blacklisted");
         require(!_relayers.contains(msg.sender), "DepositRouter::register: relay already registered");
         require(msg.value >= stakeAmount, "DepositRouter:register: insufficient stake amount");
 
@@ -262,5 +274,9 @@ contract DepositRouter is Ownable, ReentrancyGuard {
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         
         require(from == ECDSA.recover(digest, sig.v, sig.r, sig.s), "DepositRouter::_verifyDepositSig: unable to verify deposit sig");
+    }
+
+    function _blacklist(address relay) internal {
+        blacklisted[relay] = true;
     }
 }

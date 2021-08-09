@@ -279,10 +279,60 @@ describe("Unit tests", function () {
                     .withArgs(nonAdminSigner.address, admin.address);
             });
 
+            it("address is blacklisted after admin deregister", async () => {
+                const nonAdminSigner = (await ethers.getSigners())[5];
+
+                let tx = await router.connect(nonAdminSigner).register("random", { value: stakeAmount });
+                await tx.wait();
+
+                tx = await router.adminDeregister(nonAdminSigner.address);
+                await tx.wait();
+
+                const isBlacklisted = await router.blacklisted(nonAdminSigner.address);
+
+                expect(isBlacklisted).to.equal(true);
+            });
+
+            it("blacklisted address cannot register", async () => {
+                const nonAdminSigner = (await ethers.getSigners())[5];
+
+                const tx = await router.blacklist(nonAdminSigner.address);
+                await tx.wait();
+
+                await expect(
+                    router.connect(nonAdminSigner).register("random url", { value: stakeAmount }),
+                ).to.be.revertedWith("DepositRouter::register: relay has been blacklisted");
+            });
+
             it("reverts when non admin tries to call adminDeregister", async () => {
                 const nonAdminSigner = (await ethers.getSigners())[5];
 
                 await expect(router.connect(nonAdminSigner).adminDeregister(nonAdminSigner.address)).to.be.revertedWith(
+                    "Ownable: caller is not the owner",
+                );
+            });
+
+            it("admin can unblacklist an address", async () => {
+                const nonAdminSigner = (await ethers.getSigners())[5];
+
+                let tx = await router.blacklist(nonAdminSigner.address);
+                await tx.wait();
+
+                let isBlacklisted = await router.blacklisted(nonAdminSigner.address);
+
+                expect(isBlacklisted).to.equal(true);
+
+                tx = await router.unBlacklist(nonAdminSigner.address);
+
+                isBlacklisted = await router.blacklisted(nonAdminSigner.address);
+
+                expect(isBlacklisted).to.equal(false);
+            });
+
+            it("reverts if non owner tries to unblacklist", async () => {
+                const nonAdminSigner = (await ethers.getSigners())[5];
+
+                await expect(router.connect(nonAdminSigner).unBlacklist(nonAdminSigner.address)).to.be.revertedWith(
                     "Ownable: caller is not the owner",
                 );
             });
