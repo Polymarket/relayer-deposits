@@ -13,14 +13,20 @@ export function getDepositContract (signer: Signer, chainId: number): Contract {
 }
 
 async function maybeUpdateUrl (chainId: number): Promise<void> {
-    const signer = getSigner(chainId)
-    const depositContract = getDepositContract(signer, chainId);
+    
 
-    const registeredUrl = await depositContract.relayerUrl(await signer.getAddress());
+    let depositContract: Contract;
+    let registeredUrl: string;
+    try {
+        const signer = getSigner(chainId)
+        depositContract = getDepositContract(signer, chainId);
+
+        registeredUrl = await depositContract.relayerUrl(await signer.getAddress());
+    } catch(e) {} // eslint-disable-line
 
     const relayerUrl = process.env.RELAYER_URL
 
-    if (relayerUrl && relayerUrl !== registeredUrl) {
+    if (relayerUrl && registeredUrl && relayerUrl !== registeredUrl) {
         try {
             const tx = await depositContract.setRelayerUrl(relayerUrl);
             console.log(`Updating relayer url to ${relayerUrl} at tx hash ${tx.hash}`);
@@ -31,10 +37,17 @@ async function maybeUpdateUrl (chainId: number): Promise<void> {
 }
 
 async function maybeRegister (chainId: number): Promise<void> {
-    const signer = getSigner(chainId);
-    const depositContract = getDepositContract(signer, chainId);
+    let depositContract: Contract;
+    let isRegistered: boolean;
 
-    const isRegistered = await depositContract.isRegistered(await signer.getAddress());
+    try {
+        const signer = getSigner(chainId);
+        depositContract = getDepositContract(signer, chainId);
+        isRegistered = await depositContract.isRegistered(await signer.getAddress());
+    } catch (e) {
+        // don't try to register if no network is detected
+        isRegistered = true
+    }
 
     if (!isRegistered) {
         if (!process.env.RELAYER_URL) throw new Error("Cannot register relayer when RELAYER_URL is undefined in .env");
@@ -55,6 +68,8 @@ async function maybeRegister (chainId: number): Promise<void> {
 export async function maybeRegisterAllChains (): Promise<void> {
     const registerPromises = chains.map(({ id }) => {
         if (process.env.TESTING_MODE === "true" && id !== 31337) return;
+
+        if (process.env.TESTING_MODE !== "true" && id === 31337) return;
 
         return maybeRegister(id)
     });

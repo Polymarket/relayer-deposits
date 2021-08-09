@@ -16,7 +16,7 @@ app.use(bodyParser()).use(cors()).use(router.routes()).use(router.allowedMethods
 app.listen(port, async () => {
     console.log(`Listening on port ${port}`);
 
-    const signer = getSigner(31337); // 1);
+    const signer = getSigner(1);
     const relay = await signer.getAddress();
     console.log("Relay account:", relay);
 
