@@ -4,8 +4,8 @@ import { MaxUint256 } from "@ethersproject/constants";
 import { Contract } from "ethers";
 import UniswapV2RouterAbi from "./abi/UniswapV2RouterAbi";
 import ERC20Abi from "./abi/ERC20";
-import { Config } from "./config";
 import { UNISWAP_ROUTER } from "./constants";
+import DepositRouterAbi from "./abi/DepositRouterAbi";
 
 const approve = async (signer: Signer, token: Contract, router: Contract) => {
   const address = await signer.getAddress();
@@ -68,22 +68,21 @@ const swapExactTokensForETH = async (
 };
 
 /**
- *
  * @param signer - Signer in use
- * @param config - Run Config
- * @param receiver - Address of relayer to be filled
- * @returns
+ * @param routerAddress - Address of the DepositRouter contract
+ * @param collectedFees - Fees to be swapped for ETH
  */
 export const swapAndSend = async (
   signer: Signer,
-  config: Config,
-  receiver: string
+  routerAddress: string,
+  collectedFees: BigNumber
 ) => {
   const address = await signer.getAddress();
-  const usdcTokenAddress = config.token;
+  const routerContract = new Contract(routerAddress, DepositRouterAbi, signer);
 
-  const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
-  const usdcBalanceOnSigner: BigNumber = await usdc.balanceOf(address);
+  const rootTokenAddress = await routerContract.rootToken();
+
+  const rootToken = new Contract(rootTokenAddress, ERC20Abi, signer);
 
   const uniswapV2Router = new Contract(
     UNISWAP_ROUTER,
@@ -91,12 +90,12 @@ export const swapAndSend = async (
     signer
   );
 
-  console.log(`Swapping ${usdcBalanceOnSigner} USDC for ETH...`);
-  await approve(signer, usdc, uniswapV2Router);
+  console.log(`Swapping ${collectedFees} USDC for ETH...`);
+  await approve(signer, rootToken, uniswapV2Router);
   await swapExactTokensForETH(
-    usdc,
-    usdcBalanceOnSigner,
+    rootToken,
+    collectedFees,
     uniswapV2Router,
-    receiver
+    address
   );
 };

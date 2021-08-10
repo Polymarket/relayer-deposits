@@ -16,8 +16,8 @@ export const GOERLI_CONFIG: Config = {
 };
 
 export const MAINNET_CONFIG: Config = {
-  token: "", // TODO: complete
-  depositRouter: "0xfeEDf332689A821E24583eC9545a5A0E43188C27",
+  token: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  depositRouter: "0xf136c4101E06fD6cde533ba20473B2c1f80cAFd6",
   balanceThreshold: ethers.utils.parseEther("0.25"),
   relayer: "", // TODO: complete
 };

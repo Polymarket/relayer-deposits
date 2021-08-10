@@ -1,10 +1,15 @@
 import { RelayerParams } from "defender-relay-client/lib/relayer";
 import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
-import { getConfig, getRelayerProvider } from "./utils";
+import { getDepositRouterAddress, getRelayerProvider } from "./utils";
 import { claim } from "./claim";
 import { swapAndSend } from "./swap";
-import { getRelayerBalance } from "./relayer";
 
+/**
+ * Handler function to be called by OZ Autotask
+ * Claims fees for a relayer and swaps them for ETH
+ * NOTE: This should be called with the registered relayer address as Signer
+ * @param credentials
+ */
 export const handler = async (credentials: RelayerParams) => {
   const provider = getRelayerProvider(credentials);
   const signer = new DefenderRelaySigner(credentials, provider, {
@@ -12,25 +17,14 @@ export const handler = async (credentials: RelayerParams) => {
   });
 
   const chainId = await signer.getChainId();
-  console.log(`Starting autotask function, chainid: ${chainId}...`);
+  console.log(`Starting claim and swap autotask, chainID: ${chainId}...`);
 
-  const config = getConfig(chainId);
+  const routerAddress = getDepositRouterAddress(chainId);
 
   try {
-    // Check ETH balance on Relayer
-    const { relayer } = config;
-    const relayerBalance = await getRelayerBalance(relayer, signer);
+    const claimedFees = await claim(signer, routerAddress);
 
-    if (relayerBalance.gt(config.balanceThreshold)) {
-      console.log(`Relayer balance sufficient, no-op.`);
-      return;
-    }
-
-    // Claim and forward fees if relayer balance below balanceThreshold
-    console.log(`Relayer balance < balanceThreshold, refilling relayer..`);
-    await claim(signer, config);
-
-    await swapAndSend(signer, config, relayer);
+    await swapAndSend(signer, routerAddress, claimedFees);
 
     console.log(`Complete!`);
   } catch (e) {
