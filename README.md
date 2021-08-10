@@ -1,9 +1,5 @@
 # Polymarket Deposit Relayer
 
-### Trust Assumptions
-
-To save gas there's no verification on chain that the user has agreed to the deposit fee. As a result, a the relay server can technically charge the user whatever it wants. Since we are using magic link and can make users sign whatever we want, the trust assumption would be the same even with on-chain verification that the user has agreed to the fee. Nonetheless, it's an important aspect of the deposit relay server to understand for anyone making changes to it because we never want to overcharge users what they agree to in the UI.
-
 ## SDK
 
 `yarn add @polymarket/relayer-deposits`
@@ -11,26 +7,39 @@ To save gas there's no verification on chain that the user has agreed to the dep
 ### Deposit Flow
 
 ```jsx
-import { DepositClient, getGasPriceAndFee } from "@polymarket/relayer-deposits";
+import { DepositClient, getGasPriceAndFee, getRelayers } from "@polymarket/relayer-deposits";
 
-const { gasPrice, fee } = await getGasPriceAndFee(
+const maximumAcceptedFees = { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3) }, // maximum accepted fees. standard fee is in bps of total deposit and minFee is the minimum added to a transaction fee when the deposit amount is low
+
+const relayers = await getRelayers(
+  provider, // an ethers.js provider
+  1, // chainId
+  maximumAcceptedFees, // optional maximum accepted fees which we'll filter relayers out with
+);
+
+const { gasPrice, ethPrice } = await getGasPriceAndFee(
   // mainnet ethers Provider (we're using chainlink to get the eth price which isn't on goerli
   mainnetProvider,
+  relayerFee, // pass in maximum accepted fee to estimate the fee for the user
+  depositAmount, // the amount the user wants to deposit
   { gasStationKey: GAS_STATION_API_KEY }
 );
 
 const client = new DepositClient(
   signer, // ethers Signer (must be connected to an ethers Provider)
-  "https://deposit-relayer.herokuapp.com", // relayer base url
+  maximumAcceptedFees,
   1, // network id
 );
 
-const txResponse = await client.deposit(
-  depositAmount,
+const txResponse = await client.deposit({
+  value: depositAmount,
   fee,
   gasPrice,
+  ethPrice,
+  maxBlock: (await provider.getCurrentBlock()) + 5
   depositRecipient,
-);
+  relayers
+});
 
 const txReceipt = await txResponse.wait()
 ```
@@ -80,6 +89,28 @@ Status Code: 400
 Response Data: "Failed to estimate gas for deposit transaction. Transaction will likely fail. Message: " + error.message
 
 - there was an error estimating gas which likely means that the transaction will revert. As long as the user has the depostAmount of USDC and the relayer is set up correctly this error should not happen.
+
+## Running the server
+
+You'll need:
+- An Infura api key you can get [here](https://infura.io/).
+- Eth Gas Station api key you can get [here](https://ethgasstation.info/).
+- One of
+  - Recommended: Set up an account with https://defender.openzeppelin.com/#/relay and create a Relayer on mainnet. Our relayer server can optionally submit transactions through a Defender Relay which is more secure and better at submitting transactions than the bare bones wallet we'd otherwise have set up.
+  - A twelve word mnemonic. You can generate it with `npx mnemonics`
+
+```bash
+git clone git@github.com:Polymarket/relayer-deposits.git
+cp .env.example .env
+```
+
+Add those credentials to their respective place in the .env file. You'll want to also change the `RELAYER_URL` to the url your server can be found at. When you server starts it will automatically register at this url. If the url in the .env changes, the server will send a transaction to change the registered url when the server starts.
+
+Start the server:
+```bash
+yarn
+yarn start
+```
 
 ## Testing
 
