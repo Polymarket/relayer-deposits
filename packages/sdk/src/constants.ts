@@ -8,8 +8,8 @@ export const ETHER_DECIMALS = 18;
 
 /* DEPOSIT ROUTER CONTRACT */
 export const DEPOSIT_CONTRACT_NAME = "Polymarket Deposit Router";
-export const DEPOSIT_GAS = 233695;
+export const DEPOSIT_GAS = 174540;
 
 /* REQUEST TIMEOUTS */
-export const DEFAULT_TIMEOUT = 8000;
-export const RELAY_INFO_TIMEOUT = 4000;
+export const DEFAULT_TIMEOUT = 16000;
+export const RELAY_INFO_TIMEOUT = 12000;

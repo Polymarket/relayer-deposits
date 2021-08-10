@@ -16,7 +16,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
         (relayInfo: string) =>
             new Promise(resolve => {
                 const [address, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
-                getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT) // 4 second timeout
+                getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT)
                     .get("/relay-info")
                     .then((response: any) => {
                         const fees = {
@@ -29,8 +29,8 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
 
                         const areFeesAcceptable =
                             !maxFees ||
-                            fees.standardFee > maxFees.standardFee ||
-                            BigNumber.from(fees.minFee).gt(maxFees.minFee);
+                            (fees.standardFee <= maxFees.standardFee &&
+                                BigNumber.from(fees.minFee).lte(maxFees.minFee));
 
                         // check that relayer fees are acceptable
                         if (!hasFees || !areFeesAcceptable) {
@@ -43,7 +43,9 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                             endpoint: relayEndpoint,
                         });
                     })
-                    .catch(() => {
+                    .catch((e: any) => {
+                        console.log("Error fetching relay info");
+                        console.log({ e });
                         resolve({});
                     });
             }),
