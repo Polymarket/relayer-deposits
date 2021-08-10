@@ -1,26 +1,47 @@
 import { DefenderRelaySigner, DefenderRelayProvider } from "defender-relay-client/lib/ethers"
 
-export const isDefenderSetup = (network: number): boolean => {
-    const defenderChainId = process.env.DEFENDER_CHAIN_ID;
+import { chainId } from "./env";
+
+let isDefenderSetup: boolean;
+
+export const getIsDefenderSetup = async (): Promise<boolean> => {
+    if (isDefenderSetup != null) return isDefenderSetup;
+
     const rawCredentials = process.env.DEFENDER_CREDENTIALS;
 
-    if (!rawCredentials || !defenderChainId) return false;
-
-    if (defenderChainId !== network.toString()) return false;
+    if (!rawCredentials) return false;
 
     try {
-        JSON.parse(rawCredentials);
-        return true;
-    } catch (_e: any) {
+        getCredentials();
+    } catch (e: any) { // eslint-disable-line
         return false;
     }
+
+    const provider = getDefenderProvider();
+
+    const network = await provider.getNetwork();
+
+    isDefenderSetup = network.chainId === chainId;
+
+    console.log({ isDefenderSetup });
+
+    return isDefenderSetup;
 }
 
-export const getDefenderSigner = (network: number): DefenderRelaySigner => {
-    if (!isDefenderSetup(network)) throw new Error(`Cannot get defender signer on network ${network}`);
+/*
+ * Throws if DEFENDER_CREDENTIALS is undefined in the .env
+ */
+const getCredentials = (): any => JSON.parse(process.env.DEFENDER_CREDENTIALS); // eslint-disable-line
 
-    const credentials = JSON.parse(process.env.DEFENDER_CREDENTIALS);
+const getDefenderProvider = (): DefenderRelayProvider => {
+    const credentials = getCredentials();
 
-    const provider = new DefenderRelayProvider(credentials);
-    return new DefenderRelaySigner(credentials, provider);
+    return new DefenderRelayProvider(credentials);
+}
+
+export const getDefenderSigner = async (): Promise<DefenderRelaySigner> => {
+    if (!(await getIsDefenderSetup())) throw new Error(`Cannot get defender signer.`);
+
+    const provider = getDefenderProvider();
+    return new DefenderRelaySigner(getCredentials(), provider);
 }

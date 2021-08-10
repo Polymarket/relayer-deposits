@@ -3,7 +3,6 @@ import { Contract } from "@ethersproject/contracts";
 import { getRouterAddress } from "@polymarket/relayer-deposits";
 
 import depositRouterAbi from "./depositRouterAbi.json";
-import chains from "./chains";
 import { getSigner } from "./utils";
 
 export function getDepositContract (signer: Signer, chainId: number): Contract {
@@ -13,12 +12,10 @@ export function getDepositContract (signer: Signer, chainId: number): Contract {
 }
 
 async function maybeUpdateUrl (chainId: number): Promise<void> {
-    
-
     let depositContract: Contract;
     let registeredUrl: string;
     try {
-        const signer = getSigner(chainId)
+        const signer = await getSigner()
         depositContract = getDepositContract(signer, chainId);
 
         registeredUrl = await depositContract.relayerUrl(await signer.getAddress());
@@ -36,12 +33,12 @@ async function maybeUpdateUrl (chainId: number): Promise<void> {
     }
 }
 
-async function maybeRegister (chainId: number): Promise<void> {
+export async function maybeRegister (chainId: number): Promise<void> {
     let depositContract: Contract;
     let isRegistered: boolean;
 
     try {
-        const signer = getSigner(chainId);
+        const signer = await getSigner();
         depositContract = getDepositContract(signer, chainId);
         isRegistered = await depositContract.isRegistered(await signer.getAddress());
     } catch (e) {
@@ -63,16 +60,4 @@ async function maybeRegister (chainId: number): Promise<void> {
     } else {
         await maybeUpdateUrl(chainId);
     }
-}
-
-export async function maybeRegisterAllChains (): Promise<void> {
-    const registerPromises = chains.map(({ id }) => {
-        if (process.env.TESTING_MODE === "true" && id !== 31337) return;
-
-        if (process.env.TESTING_MODE !== "true" && id === 31337) return;
-
-        return maybeRegister(id)
-    });
-
-    await Promise.all(registerPromises);
 }

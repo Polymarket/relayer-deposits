@@ -113,9 +113,10 @@ describe("Deposit Relayer", () => {
     it("get relayers returns the relayer", async () => {
         const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK);
 
-        const initialRelayer = relayers[0];
+        const foundRelayer = relayers.find((current: Relayer) => current.address === relayer.address);
 
-        expect(initialRelayer.address).to.equal(relayer.address);
+        // will be undefined if it's not found
+        expect(foundRelayer?.address).to.equal(relayer.address);
     });
 
     it("filters out relayers when fees are unacceptable", async () => {

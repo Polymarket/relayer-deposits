@@ -1,7 +1,8 @@
+
 import { Wallet } from "@ethersproject/wallet";
 
 import { getWallet } from "./utils";
-import { isDefenderSetup } from "./defender";
+import { getIsDefenderSetup } from "./defender";
 
 /*
  * If transactions are dropped, our nonce will continue incrementing so subsequent
@@ -15,48 +16,46 @@ import { isDefenderSetup } from "./defender";
 const NONCE_STALE_THRESHOLD = 10;
 
 export default class NonceManager {
-    private nonces: Record<number, number>;
+    private wallet: Wallet;
+    private nonce: number;
 
     constructor() {
-        this.nonces = {};
+        this.wallet = getWallet();
+        this.nonce = 0;
     }
 
-    static async currentNonce(chainId: number): Promise<number> {
-        const wallet = getWallet(chainId);
-        return wallet.provider.getTransactionCount(wallet.address);
+    async currentNonce(): Promise<number> {
+        return this.wallet.provider.getTransactionCount(this.wallet.address);
     }
 
-    private async setNonce(chainId): Promise<void> {
-        const curNonce = await NonceManager.currentNonce(chainId);
-        this.nonces[chainId] = curNonce;
+    async setNonce(): Promise<void> {
+        this.nonce = await this.currentNonce();
     }
 
-    private async checkNonceFresh(chainId: number): Promise<void> {
-        const currentNonce = await NonceManager.currentNonce(chainId);
-        if (this.nonces[chainId] - NONCE_STALE_THRESHOLD > currentNonce || this.nonces[chainId] < currentNonce) {
-            this.nonces[chainId] = currentNonce;
+    async checkNonceFresh(): Promise<void> {
+        const currentNonce = await this.currentNonce();
+        if (this.nonce - NONCE_STALE_THRESHOLD > currentNonce || this.nonce < currentNonce) {
+            this.nonce = currentNonce;
         }
     }
 
-    async getNonce(chainId: number): Promise<number | void> {
-        if (isDefenderSetup(chainId)) return;
+    async getNonce(): Promise<number | void> {
+        if (await getIsDefenderSetup()) return;
 
-        if (!this.nonces[chainId]) {
-            await this.setNonce(chainId);
+        if (!this.nonce) {
+            await this.setNonce();
         } else {
-            await this.checkNonceFresh(chainId);
+            await this.checkNonceFresh();
         }
 
-        return this.nonces[chainId];
+        return this.nonce as number;
     }
 
-    async incrementNonce(chainId): Promise<void> {
-        if (isDefenderSetup(chainId)) return;
-
-        if (!this.nonces[chainId]) {
-            await this.setNonce(chainId);
+    async incrementNonce(): Promise<void> {
+        if (!this.nonce) {
+            await this.setNonce();
         }
 
-        this.nonces[chainId] += 1;
+        this.nonce += 1;
     }
 }
