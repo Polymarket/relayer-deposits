@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { AutotaskClient } = require("defender-autotask-client");
 
-require("dotenv").config();
+require("dotenv").config({ path: "../../.env" });
+
+const parseDefenderCreds = () => {
+  return JSON.parse(process.env.DEFENDER_CREDENTIALS);
+};
 
 async function main() {
   console.log(`Uploading rolled up code to Defender...`);
+  const creds = parseDefenderCreds();
 
   const defenderClient = new AutotaskClient({
-    apiKey: process.env.OZ_API_KEY,
-    apiSecret: process.env.OZ_API_SECRET,
+    apiKey: creds.apiKey,
+    apiSecret: creds.apiSecret,
   });
 
   await defenderClient.updateCodeFromFolder(
