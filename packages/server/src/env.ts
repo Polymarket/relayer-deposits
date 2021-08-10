@@ -14,4 +14,8 @@ if (!process.env.INFURA_API_KEY) {
     throw new Error("Environment must specify `INFURA_API_KEY`.");
 }
 
-export const defenderChainId = process.env.DEFENDER_CHAIN_ID && parseInt(process.env.DEFENDER_CHAIN_ID);
+if (!process.env.CHAIN_ID) {
+    throw new Error("Environment must specific `CHAIN_ID`");
+}
+
+export const chainId = parseInt(process.env.CHAIN_ID);

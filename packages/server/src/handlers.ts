@@ -6,6 +6,8 @@ import { Signature } from "@polymarket/relayer-deposits";
 import { getSigner, getFee } from "./utils";
 import { getDepositContract } from "./depositContract";
 import NonceManager from "./NonceManager";
+import { chainId } from "./env";
+import { getIsDefenderSetup } from "./defender";
 
 const nonceManager = new NonceManager();
 
@@ -35,16 +37,18 @@ export const handleDeposit = async (ctx, next) => {
         validBefore,
         receiveNonce,
         gasPrice,
-        chainId,
+        chainId: requestedChainId,
         maxBlock,
     } = (ctx.request.body as DepositRequestBody);
+
+    ctx.assert(chainId === requestedChainId, 400, `Requested deposit on chainId ${requestedChainId} but server only accepts deposits on ${chainId}`);
 
     ctx.assert(BigNumber.from(totalValue).gt(userProvidedFee), 400, "Deposit amount must be greater than the fee");
 
     let signer: Signer;
     try {
         // will throw on an unsupported chainId
-        signer = await getSigner(chainId);
+        signer = await getSigner();
     } catch (_e) {
         ctx.throw(400, "Unsupported chainId " + chainId);
     }
@@ -95,9 +99,9 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     try {
-        const relayerNonce = await nonceManager.getNonce(chainId);
+        const isDefenderSetup = await getIsDefenderSetup();
 
-        const txOptions = relayerNonce ? { gasPrice, nonce: relayerNonce } : { gasPrice };
+        const txOptions = isDefenderSetup ? { gasPrice } : { gasPrice, nonce: await nonceManager.getNonce() };
 
         const tx = await depositContract.deposit(
             from,
@@ -114,7 +118,7 @@ export const handleDeposit = async (ctx, next) => {
 
         console.log(`Sending tx with hash ${tx.hash}`);
 
-        await nonceManager.incrementNonce(chainId);
+        isDefenderSetup && await nonceManager.incrementNonce();
 
         ctx.body = {
             hash: tx.hash,

@@ -1,6 +1,5 @@
 import Router from "koa-router";
 
-import { defenderChainId } from "./env";
 import { getSigner, RELAYER_FEE } from "./utils";
 import { handleDeposit } from "./handlers";
 
@@ -18,7 +17,7 @@ router.post("/deposit", handleDeposit);
 router.get("/relay-info", async (ctx, next) => {
     await next();
 
-    const signer = getSigner(defenderChainId || 1);
+    const signer = await getSigner();
 
     const relayAddress = await signer.getAddress();
 

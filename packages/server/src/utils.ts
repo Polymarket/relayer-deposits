@@ -5,7 +5,8 @@ import { JsonRpcMultiProvider } from "@polymarket/multi-endpoint-provider";
 import { getGasPriceAndFee } from "@polymarket/relayer-deposits";
 
 import { getChain } from "./chains";
-import { isDefenderSetup, getDefenderSigner } from "./defender";
+import { getIsDefenderSetup, getDefenderSigner } from "./defender";
+import { chainId } from "./env";
 
 export const RELAYER_FEE = { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3).toHexString() } // 30 bps standard fee and 3 USDC min fee
 
@@ -17,8 +18,8 @@ export const getProvider = (network: number): JsonRpcMultiProvider => {
     return new JsonRpcMultiProvider(chainData.rpcUrls);
 };
 
-export const getWallet = (network: number): Wallet => {
-    const provider = getProvider(network);
+export const getWallet = (): Wallet => {
+    const provider = getProvider(chainId);
 
     if (!process.env.MNEMONIC) {
         throw new Error("MNEMONIC env var not set");
@@ -29,12 +30,12 @@ export const getWallet = (network: number): Wallet => {
     return wallet.connect(provider);
 }
 
-export const getSigner = (network: number): Signer => {
-    if (isDefenderSetup(network)) {
-        return getDefenderSigner(network);
+export const getSigner = async (): Promise<Signer> => {
+    if (await getIsDefenderSetup()) {
+        return getDefenderSigner();
     }
 
-    return getWallet(network);
+    return new Promise(resolve => resolve(getWallet()));
 };
 
 export const getFee = async (depositAmount: BigNumber): Promise<{ gasPrice: BigNumber, fee: BigNumber, ethPrice: string }> => {
