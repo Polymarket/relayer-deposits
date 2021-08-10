@@ -20,7 +20,6 @@ type DepositRequestBody = {
     fee: string; // hexstring
     validBefore: number;
     receiveNonce: string; // hexstring
-    gasPrice: string; // hexstring
     chainId: number;
     maxBlock: number;
 };
@@ -36,7 +35,6 @@ export const handleDeposit = async (ctx, next) => {
         fee: userProvidedFee,
         validBefore,
         receiveNonce,
-        gasPrice,
         chainId: requestedChainId,
         maxBlock,
     } = (ctx.request.body as DepositRequestBody);
@@ -70,10 +68,9 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     // check gas price is fast to prevent slow gas price from slowing deposits
-    const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee(BigNumber.from(totalValue));
+    const { fee: calculatedFee } = await getFee(BigNumber.from(totalValue));
 
-    const gasPriceMin = calculatedGasPrice.mul(90).div(100);
-    ctx.assert(BigNumber.from(gasPrice).gt(gasPriceMin), 400, "Gas price lower than minimum accepted.");
+    console.log({ calculatedFee: calculatedFee.div(BigNumber.from(10).pow(6)).toString() });
 
     // check that the fee is acceptable
     const fee = calculatedFee.lt(userProvidedFee) ? calculatedFee : userProvidedFee;
@@ -101,7 +98,7 @@ export const handleDeposit = async (ctx, next) => {
     try {
         const isDefenderSetup = await getIsDefenderSetup();
 
-        const txOptions = isDefenderSetup ? { gasPrice } : { gasPrice, nonce: await nonceManager.getNonce() };
+        const txOptions = isDefenderSetup ? {} : { nonce: await nonceManager.getNonce() };
 
         const tx = await depositContract.deposit(
             from,

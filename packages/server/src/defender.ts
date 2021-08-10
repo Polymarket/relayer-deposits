@@ -41,5 +41,5 @@ export const getDefenderSigner = async (): Promise<DefenderRelaySigner> => {
     if (!(await getIsDefenderSetup())) throw new Error(`Cannot get defender signer.`);
 
     const provider = getDefenderProvider();
-    return new DefenderRelaySigner(getCredentials(), provider);
+    return new DefenderRelaySigner(getCredentials(), provider, { speed: "fast" });
 }
