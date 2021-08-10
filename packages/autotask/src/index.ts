@@ -7,7 +7,7 @@ import { swapAndSend } from "./swap";
 /**
  * Handler function to be called by OZ Autotask
  * Claims fees for a relayer and swaps them for ETH
- * NOTE: This should be called with the registered relayer address as Signer
+ * NOTE: This must be called with the registered relayer address as Signer
  * @param credentials
  */
 export const handler = async (credentials: RelayerParams) => {
