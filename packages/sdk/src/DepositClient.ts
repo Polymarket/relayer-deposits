@@ -152,7 +152,6 @@ export class DepositClient {
             validBefore,
             receiveNonce,
             maxBlock,
-            gasPrice: gasPrice.toHexString(),
             chainId: this.chainId,
         });
 
