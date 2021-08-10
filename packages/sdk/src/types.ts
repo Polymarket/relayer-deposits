@@ -1,6 +1,6 @@
-import { TypedDataDomain, TypedDataField, Signer } from "@ethersproject/abstract-signer";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
-import { JsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Transaction } from "@ethersproject/transactions";
 
@@ -25,3 +25,14 @@ export type DepositProvider = Provider & {
 };
 
 export type DepositResponse = TransactionResponse & { fee: BigNumber };
+
+export type RelayerFee = {
+    minFee: string; // minFee is added to the gas cost of the transaction
+    standardFee: number; // decimal fee on deposits i.e. 0.003 is a 0.3% fee
+};
+
+export type Relayer = {
+    endpoint: string;
+    fees: RelayerFee;
+    address: string;
+};

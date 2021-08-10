@@ -30,11 +30,13 @@ const config: HardhatUserConfig = {
             forking: {
                 url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
             },
+            hardfork: "london",
+            gasPrice: 80000000000,
         },
         localhost: {
             chainId: ChainId.hardhat,
             saveDeployments: false,
-            url: "http://localhost:8545"
+            url: "http://localhost:8545",
         },
         mainnet: { accounts, ...getRemoteNetworkConfig("mainnet") },
         goerli: { accounts, ...getRemoteNetworkConfig("goerli") },

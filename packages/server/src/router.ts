@@ -1,6 +1,7 @@
 import Router from "koa-router";
 
-import { getSigner } from "./utils";
+import { defenderChainId } from "./env";
+import { getSigner, RELAYER_FEE } from "./utils";
 import { handleDeposit } from "./handlers";
 
 const router = new Router();
@@ -8,7 +9,7 @@ const router = new Router();
 router.get("/", async (ctx, next) => {
     await next();
 
-    ctx.body = "Polymarket Deposit Relayer";
+    ctx.body = "Deposit Relayer";
     ctx.status = 200;
 });
 
@@ -17,16 +18,18 @@ router.post("/deposit", handleDeposit);
 router.get("/relay-info", async (ctx, next) => {
     await next();
 
-    const signer = getSigner(1);
+    const signer = getSigner(defenderChainId || 1);
 
     const relayAddress = await signer.getAddress();
 
     const balance = await signer.provider.getBalance(relayAddress);
 
     ctx.body = {
-        RelayerAddress: relayAddress,
-        Balance: balance.toString(),
-        Ready: true,
+        relayerAddress: relayAddress,
+        balance: balance.toString(),
+        ready: true,
+        standardFee: RELAYER_FEE.standardFee,
+        minFee: RELAYER_FEE.minFee,
     };
     ctx.status = 200;
 });

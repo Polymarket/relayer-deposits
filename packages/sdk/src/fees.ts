@@ -5,6 +5,7 @@ import { mulBN } from "@polymarket/amm-maths";
 import axios from "axios";
 
 import { DEPOSIT_GAS, ETHER_DECIMALS, USDC_DECIMALS } from "./constants";
+import { RelayerFee } from "./types";
 
 /**
  * Given an amount of ETH in wei and an ethPrice in USDC return the cost in USDC
@@ -61,26 +62,43 @@ export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> 
     return ethPrice as string;
 };
 
+export const getFeeFromGasPrice = (
+    gasPrice: BigNumber,
+    ethPrice: string,
+    relayerFee: RelayerFee,
+    depositAmount: BigNumber,
+): BigNumber => {
+    const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
+
+    const txCost = gasPriceUSDC.mul(DEPOSIT_GAS);
+    const minFee = txCost.add(relayerFee.minFee);
+
+    const standardFee = mulBN(depositAmount, relayerFee.standardFee);
+
+    return minFee.gt(standardFee) ? minFee : standardFee;
+};
+
 type GetFeeOptions = {
-    gasMultiplier: number; // divided by 100
+    gasMultiplier: number;
     gasStationKey: string;
 };
 
 export const getGasPriceAndFee = async (
     mainnetProvider: Provider,
+    relayerFee: RelayerFee,
+    depositAmount: BigNumber,
     options?: Partial<GetFeeOptions>,
-): Promise<{ gasPrice: BigNumber; fee: BigNumber }> => {
+): Promise<{ gasPrice: BigNumber; ethPrice: string; fee: BigNumber }> => {
     const [ethPrice, actualGasPrice] = await Promise.all([
         getEtherPrice(mainnetProvider),
         getGasPrice(mainnetProvider, options?.gasStationKey),
     ]);
 
-    const gasPrice = options?.gasMultiplier ? actualGasPrice.mul(options?.gasMultiplier).div(100) : actualGasPrice;
-
-    const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
+    const gasPrice = options?.gasMultiplier ? mulBN(actualGasPrice, options?.gasMultiplier) : actualGasPrice;
 
     return {
         gasPrice,
-        fee: gasPriceUSDC.mul(DEPOSIT_GAS),
+        ethPrice,
+        fee: getFeeFromGasPrice(gasPrice, ethPrice, relayerFee, depositAmount),
     };
 };

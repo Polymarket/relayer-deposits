@@ -11,28 +11,32 @@ const nonceManager = new NonceManager();
 
 type DepositRequestBody = {
     receiveSig: string;
+    depositSig: string;
     from: string;
     depositRecipient: string;
     totalValue: string; // hexstring
     fee: string; // hexstring
     validBefore: number;
-    nonce: string; // hexstring
+    receiveNonce: string; // hexstring
     gasPrice: string; // hexstring
     chainId: number;
+    maxBlock: number;
 };
 
 export const handleDeposit = async (ctx, next) => {
     await next();
     const {
-        receiveSig,
+        receiveSig: receiveSigRaw,
+        depositSig: depositSigRaw,
         from,
         depositRecipient,
         totalValue,
         fee: userProvidedFee,
         validBefore,
-        nonce,
-        gasPrice: userProvidedGasPrice,
+        receiveNonce,
+        gasPrice,
         chainId,
+        maxBlock,
     } = (ctx.request.body as DepositRequestBody);
 
     ctx.assert(BigNumber.from(totalValue).gt(userProvidedFee), 400, "Deposit amount must be greater than the fee");
@@ -47,17 +51,22 @@ export const handleDeposit = async (ctx, next) => {
 
     const depositContract = getDepositContract(signer, chainId);
 
-    let sig: Signature;
+    let receiveSig: Signature;
     try {
-        sig = splitSignature(receiveSig);
+        receiveSig = splitSignature(receiveSigRaw);
     } catch (e) {
         ctx.throw(400, `Error splitting signature: ${e.message}`);
     }
 
-    // check gas price is fast to prevent slow gas price from slowing deposits
-    const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee();
+    let depositSig: Signature;
+    try {
+        depositSig = splitSignature(depositSigRaw);
+    } catch (e) {
+        ctx.throw(400, `Error splitting signature ${e.message}`);
+    }
 
-    const gasPrice = calculatedGasPrice.lt(userProvidedGasPrice) ? calculatedGasPrice : BigNumber.from(userProvidedGasPrice);
+    // check gas price is fast to prevent slow gas price from slowing deposits
+    const { fee: calculatedFee, gasPrice: calculatedGasPrice } = await getFee(BigNumber.from(totalValue));
 
     const gasPriceMin = calculatedGasPrice.mul(90).div(100);
     ctx.assert(BigNumber.from(gasPrice).gt(gasPriceMin), 400, "Gas price lower than minimum accepted.");
@@ -76,8 +85,10 @@ export const handleDeposit = async (ctx, next) => {
             totalValue,
             fee,
             validBefore,
-            nonce,
-            sig,
+            receiveNonce,
+            maxBlock,
+            receiveSig,
+            depositSig,
         );
     } catch (e) {
         ctx.throw(400, `Failed to estimate gas for deposit transaction. Transaction will likely fail. Message: ${e.message}`);
@@ -94,8 +105,10 @@ export const handleDeposit = async (ctx, next) => {
             totalValue,
             fee,
             validBefore,
-            nonce,
-            sig,
+            receiveNonce,
+            maxBlock,
+            receiveSig,
+            depositSig,
             txOptions,
         );
 
@@ -106,8 +119,10 @@ export const handleDeposit = async (ctx, next) => {
         ctx.body = {
             hash: tx.hash,
             nonce: tx.nonce,
-            gasPrice: gasPrice.toHexString(),
+            gasPrice: tx.gasPrice && tx.gasPrice.toHexString(),
             gasLimit: tx.gasLimit.toHexString(),
+            maxPriorityFeePerGas: tx.maxPriorityFeePerGas && tx.maxPriorityFeePerGas.toHexString(),
+            maxFeePerGas: tx.maxFeePerGas && tx.maxFeePerGas.toHexString(),
             to: tx.to,
             value: tx.value.toHexString(),
             data: tx.data,
