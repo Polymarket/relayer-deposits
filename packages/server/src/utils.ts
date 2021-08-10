@@ -8,7 +8,7 @@ import { getChain } from "./chains";
 import { getIsDefenderSetup, getDefenderSigner } from "./defender";
 import { chainId } from "./env";
 
-export const RELAYER_FEE = { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3).toHexString() } // 30 bps standard fee and 3 USDC min fee
+export const RELAYER_FEE = { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3) } // 30 bps standard fee and 3 USDC min fee
 
 export const getWalletWithoutProvider = (): Wallet => Wallet.fromMnemonic(process.env.MNEMONIC);
 

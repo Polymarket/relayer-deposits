@@ -21,7 +21,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                     .then((response: any) => {
                         const fees = {
                             standardFee: response?.data?.standardFee,
-                            minFee: response?.data?.minFee,
+                            minFee: response?.data?.minFee && BigNumber.from(response?.data?.minFee),
                         };
 
                         // == intended to check if null or undefined

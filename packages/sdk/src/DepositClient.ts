@@ -126,7 +126,7 @@ export class DepositClient {
     }): Promise<DepositResponse> {
         if (relayer.fees.standardFee > this.maxFee.standardFee)
             throw new Error("Relayer fee is greater than maximum fee");
-        if (BigNumber.from(relayer.fees.minFee).gt(this.maxFee.minFee))
+        if (relayer.fees.minFee.gt(this.maxFee.minFee))
             throw new Error("Relayer minFee is greater than maximum accepted min fee");
 
         const fee = getFeeFromGasPrice(gasPrice, ethPrice, relayer.fees, value);

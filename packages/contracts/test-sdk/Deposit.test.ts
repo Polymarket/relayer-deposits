@@ -43,7 +43,7 @@ describe("Deposit Relayer", () => {
 
         relayer = {
             address: relayerWallet.address,
-            fees: { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3).toHexString() },
+            fees: { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3) },
             endpoint: "http://localhost:5555",
         };
 
@@ -122,7 +122,7 @@ describe("Deposit Relayer", () => {
     it("filters out relayers when fees are unacceptable", async () => {
         const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
             standardFee: relayer.fees.standardFee + 0.001,
-            minFee: BigNumber.from(relayer.fees.minFee).add(1).toHexString(),
+            minFee: relayer.fees.minFee.add(1),
         });
 
         expect(relayers.length).to.equal(0);
