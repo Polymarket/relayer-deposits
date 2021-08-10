@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
                 url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
             },
             hardfork: "london",
-            gasPrice: 80000000000,
+            gasPrice: 800000000000,
         },
         localhost: {
             chainId: ChainId.hardhat,

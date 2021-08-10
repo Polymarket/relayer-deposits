@@ -27,7 +27,7 @@ export type DepositProvider = Provider & {
 export type DepositResponse = TransactionResponse & { fee: BigNumber };
 
 export type RelayerFee = {
-    minFee: string; // minFee is added to the gas cost of the transaction
+    minFee: BigNumber; // minFee is added to the gas cost of the transaction
     standardFee: number; // decimal fee on deposits i.e. 0.003 is a 0.3% fee
 };
 

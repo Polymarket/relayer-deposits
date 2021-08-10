@@ -28,7 +28,7 @@ router.get("/relay-info", async (ctx, next) => {
         balance: balance.toString(),
         ready: true,
         standardFee: RELAYER_FEE.standardFee,
-        minFee: RELAYER_FEE.minFee,
+        minFee: RELAYER_FEE.minFee.toHexString(),
     };
     ctx.status = 200;
 });
