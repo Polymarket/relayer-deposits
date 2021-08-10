@@ -23,8 +23,6 @@ export const getIsDefenderSetup = async (): Promise<boolean> => {
 
     isDefenderSetup = network.chainId === chainId;
 
-    console.log({ isDefenderSetup });
-
     return isDefenderSetup;
 }
 

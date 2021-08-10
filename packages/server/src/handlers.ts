@@ -7,6 +7,7 @@ import { getSigner, getFee } from "./utils";
 import { getDepositContract } from "./depositContract";
 import NonceManager from "./NonceManager";
 import { chainId } from "./env";
+import { getIsDefenderSetup } from "./defender";
 
 const nonceManager = new NonceManager();
 
@@ -98,9 +99,9 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     try {
-        const relayerNonce = await nonceManager.getNonce();
+        const isDefenderSetup = await getIsDefenderSetup();
 
-        const txOptions = relayerNonce ? { gasPrice, nonce: relayerNonce } : { gasPrice };
+        const txOptions = isDefenderSetup ? { gasPrice } : { gasPrice, nonce: await nonceManager.getNonce() };
 
         const tx = await depositContract.deposit(
             from,
@@ -117,7 +118,7 @@ export const handleDeposit = async (ctx, next) => {
 
         console.log(`Sending tx with hash ${tx.hash}`);
 
-        await nonceManager.incrementNonce();
+        isDefenderSetup && await nonceManager.incrementNonce();
 
         ctx.body = {
             hash: tx.hash,

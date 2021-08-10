@@ -52,6 +52,8 @@ export default class NonceManager {
     }
 
     async incrementNonce(): Promise<void> {
+        if (await getIsDefenderSetup()) return;
+
         if (!this.nonce) {
             await this.setNonce();
         }
