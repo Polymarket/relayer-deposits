@@ -112,6 +112,31 @@ yarn
 yarn start
 ```
 
+## Running the auto fee swapper
+
+This repo also comes with an [OpenZeppelin autotask](https://docs.openzeppelin.com/defender/autotasks) to automatically claim fees collected on the deposit contract and swaps them for ETH.
+
+To run this autotask, you'll need:
+
+- Set up an account on OpenZeppelin Defender
+
+- Create an API Key and store both the Key and the Secret
+
+- Create and fund a Relayer
+
+- Create a new Autotask and connect it to the Relayer created above. Store the Autotask ID.
+
+- Clone the repo and create a .env file:
+```bash
+git clone git@github.com:Polymarket/relayer-deposits.git
+cp .env.example .env
+```
+
+- Populate the .env file with your Api Key, Secret and Autotask ID
+
+- cd into `./packages/autotask` and run `sh ./scripts/updateAutotask.sh` to build and update the code in your Autotask
+
+
 ## Testing
 
 Currently to test the sdk you must simultaneously run a hardhat mainnet fork and the relay server. We should automate this process.

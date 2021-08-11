@@ -1,32 +1,26 @@
 import { Signer } from "@ethersproject/abstract-signer";
-import { Contract } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
-import ERC20Abi from "./abi/ERC20";
-import { Config } from "./config";
-import DepositContractAbi from "./abi/DepositContractAbi";
-import { USDC_DECIMALS, USDC_CLAIMED_TOO_LOW } from "./constants";
+import { BigNumber, Contract } from "ethers";
+import DepositRouterAbi from "./abi/DepositRouterAbi";
 
-export const claim = async (signer: Signer, config: Config) => {
-  const routerAddress = config.depositRouter;
-  const usdcTokenAddress = config.token;
+/**
+ * Claims pro rata fees for a relayer
+ * @param signer
+ * @param routerAddress
+ * @returns
+ */
+export const claim = async (
+  signer: Signer,
+  routerAddress: string
+): Promise<BigNumber> => {
   const address = await signer.getAddress();
 
-  const routerContract = new Contract(
-    routerAddress,
-    DepositContractAbi,
-    signer
-  );
-  const usdc = new Contract(usdcTokenAddress, ERC20Abi, signer);
+  const routerContract = new Contract(routerAddress, DepositRouterAbi, signer);
 
-  const usdcBalance: BigNumber = await usdc.balanceOf(routerAddress);
-  const usdcBalanceScaled: BigNumber = usdcBalance.div(USDC_DECIMALS);
+  const claimableFees: BigNumber = await routerContract.collectedFees(address);
 
-  if (usdcBalance.lt(USDC_CLAIMED_TOO_LOW)) {
-    console.warn(`USDC claimed is low: ${usdcBalanceScaled} USDC!`);
-  }
-
-  console.log(`Claiming ${usdcBalanceScaled} USDC from router...`);
-  const txn = await routerContract.claimFees(address, usdcBalance);
+  console.log(`Claiming ${claimableFees} USDC from router...`);
+  const txn = await routerContract.claimFees(address, claimableFees);
   await txn.wait();
   console.log(`Claimed USDC from router!`);
+  return claimableFees;
 };
