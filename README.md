@@ -134,7 +134,7 @@ cp .env.example .env
 
 - Populate the .env file with your Api Key, Secret and Autotask ID
 
-- cd into autotask and run `sh ./scripts/updateAutotask.sh` to build and update the code in your Autotask
+- cd into `./packages/autotask` and run `sh ./scripts/updateAutotask.sh` to build and update the code in your Autotask
 
 
 ## Testing
