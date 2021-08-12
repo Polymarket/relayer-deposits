@@ -70,8 +70,6 @@ export const handleDeposit = async (ctx, next) => {
     // check gas price is fast to prevent slow gas price from slowing deposits
     const { fee: calculatedFee } = await getFee(BigNumber.from(totalValue));
 
-    console.log({ calculatedFee: calculatedFee.div(BigNumber.from(10).pow(6)).toString() });
-
     // check that the fee is acceptable
     const fee = calculatedFee.lt(userProvidedFee) ? calculatedFee : userProvidedFee;
 
