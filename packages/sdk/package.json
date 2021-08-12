@@ -1,6 +1,6 @@
 {
   "name": "@polymarket/relayer-deposits",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "A template for typescript packages",
   "author": "Sam Hatem <sam.hatem17@gmail.com>",
   "main": "lib/index.js",
