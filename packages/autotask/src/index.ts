@@ -24,7 +24,9 @@ export const handler = async (credentials: RelayerParams) => {
   try {
     const claimedFees = await claim(signer, routerAddress);
 
-    await swapAndSend(signer, routerAddress, claimedFees);
+    if (claimedFees != null) {
+      await swapAndSend(signer, routerAddress, claimedFees);
+    }
 
     console.log(`Complete!`);
   } catch (e) {
