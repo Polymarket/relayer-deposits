@@ -10,7 +10,7 @@ import { swapAndSend } from "./swap";
  * NOTE: This must be called with the registered relayer address as Signer
  * @param credentials
  */
-export const handler = async (credentials: RelayerParams) => {
+export const handler = async (credentials: RelayerParams): Promise<void> => {
   const provider = getRelayerProvider(credentials);
   const signer = new DefenderRelaySigner(credentials, provider, {
     speed: "fastest",
@@ -22,11 +22,9 @@ export const handler = async (credentials: RelayerParams) => {
   const routerAddress = getDepositRouterAddress(chainId);
 
   try {
-    const claimedFees = await claim(signer, routerAddress);
+    await claim(signer, routerAddress);
 
-    if (claimedFees != null) {
-      await swapAndSend(signer, routerAddress, claimedFees);
-    }
+    await swapAndSend(signer, routerAddress);
 
     console.log(`Complete!`);
   } catch (e) {

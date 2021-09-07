@@ -4,11 +4,10 @@ import { MaxUint256 } from "@ethersproject/constants";
 import { Contract } from "ethers";
 import UniswapV2RouterAbi from "./abi/UniswapV2RouterAbi";
 import ERC20Abi from "./abi/ERC20";
-import { UNISWAP_ROUTER } from "./constants";
+import { UNISWAP_ROUTER, CLAIMABLE_FEES_THRESHOLD } from "./constants";
 import DepositRouterAbi from "./abi/DepositRouterAbi";
 
-const approve = async (signer: Signer, token: Contract, router: Contract) => {
-  const address = await signer.getAddress();
+const approve = async (address: string, token: Contract, router: Contract) => {
   const tokenBalanceOnSigner = await token.balanceOf(address);
   const allowance = await token.allowance(address, router.address);
 
@@ -18,6 +17,13 @@ const approve = async (signer: Signer, token: Contract, router: Contract) => {
     await txn.wait();
     console.log(`Approval complete!`);
   }
+};
+
+const getUsdcBalance = async (
+  address: string,
+  token: Contract
+): Promise<BigNumber> => {
+  return token.balanceOf(address);
 };
 
 const constructPath = async (
@@ -74,9 +80,8 @@ const swapExactTokensForETH = async (
  */
 export const swapAndSend = async (
   signer: Signer,
-  routerAddress: string,
-  collectedFees: BigNumber
-) => {
+  routerAddress: string
+): Promise<void> => {
   const address = await signer.getAddress();
   const routerContract = new Contract(routerAddress, DepositRouterAbi, signer);
 
@@ -90,12 +95,17 @@ export const swapAndSend = async (
     signer
   );
 
-  console.log(`Swapping ${collectedFees} USDC for ETH...`);
-  await approve(signer, rootToken, uniswapV2Router);
-  await swapExactTokensForETH(
-    rootToken,
-    collectedFees,
-    uniswapV2Router,
-    address
-  );
+  const balance = await getUsdcBalance(address, rootToken);
+
+  if (balance.lt(CLAIMABLE_FEES_THRESHOLD)) {
+    console.log(
+      `USDC balance ${balance} is below ${CLAIMABLE_FEES_THRESHOLD} USDC threshold.`
+    );
+
+    return;
+  }
+
+  console.log(`Swapping ${balance} USDC for ETH...`);
+  await approve(address, rootToken, uniswapV2Router);
+  await swapExactTokensForETH(rootToken, balance, uniswapV2Router, address);
 };
