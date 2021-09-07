@@ -62,18 +62,13 @@ export const getEtherPrice = async (mainnetProvider: Provider): Promise<string> 
     return ethPrice as string;
 };
 
-export const getFeeFromGasPrice = (
-    gasPrice: BigNumber,
-    ethPrice: string,
-    relayerFee: RelayerFee,
-    depositAmount: BigNumber,
-): BigNumber => {
+export const getFeeFromGasPrice = (gasPrice: BigNumber, ethPrice: string, relayerFee: RelayerFee): BigNumber => {
     const gasPriceUSDC = ethToUSDC(gasPrice, ethPrice);
 
     const txCost = gasPriceUSDC.mul(DEPOSIT_GAS);
     const minFee = txCost.add(relayerFee.minFee);
 
-    const standardFee = mulBN(depositAmount, relayerFee.standardFee);
+    const standardFee = txCost.add(mulBN(txCost, relayerFee.standardFee));
 
     return minFee.gt(standardFee) ? minFee : standardFee;
 };
@@ -86,7 +81,6 @@ type GetFeeOptions = {
 export const getGasPriceAndFee = async (
     mainnetProvider: Provider,
     relayerFee: RelayerFee,
-    depositAmount: BigNumber,
     options?: Partial<GetFeeOptions>,
 ): Promise<{ gasPrice: BigNumber; ethPrice: string; fee: BigNumber }> => {
     const [ethPrice, actualGasPrice] = await Promise.all([
@@ -99,6 +93,6 @@ export const getGasPriceAndFee = async (
     return {
         gasPrice,
         ethPrice,
-        fee: getFeeFromGasPrice(gasPrice, ethPrice, relayerFee, depositAmount),
+        fee: getFeeFromGasPrice(gasPrice, ethPrice, relayerFee),
     };
 };

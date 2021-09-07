@@ -129,7 +129,7 @@ export class DepositClient {
         if (relayer.fees.minFee.gt(this.maxFee.minFee))
             throw new Error("Relayer minFee is greater than maximum accepted min fee");
 
-        const fee = getFeeFromGasPrice(gasPrice, ethPrice, relayer.fees, value);
+        const fee = getFeeFromGasPrice(gasPrice, ethPrice, relayer.fees);
 
         const depositSig = await getDepositSignature({
             signer: this.signer,

@@ -1,6 +1,6 @@
 {
   "name": "@polymarket/relayer-deposits",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A template for typescript packages",
   "author": "Sam Hatem <sam.hatem17@gmail.com>",
   "main": "lib/index.js",
@@ -20,6 +20,7 @@
     "@ethersproject/abi": "^5.4.0",
     "@ethersproject/bytes": "^5.4.0",
     "@polymarket/amm-maths": "^0.3.0",
+    "@polymarket/relayer-deposits": "^0.2.0",
     "@tomfrench/chainlink-asset-converter": "^0.1.1",
     "axios": "^0.21.1"
   },

@@ -43,7 +43,7 @@ describe("Deposit Relayer", () => {
 
         relayer = {
             address: relayerWallet.address,
-            fees: { standardFee: 0.003, minFee: BigNumber.from(10).pow(6).mul(3) },
+            fees: { standardFee: 0.1, minFee: BigNumber.from(10).pow(6).mul(3) },
             endpoint: "http://localhost:5555",
         };
 
@@ -53,7 +53,7 @@ describe("Deposit Relayer", () => {
 
         totalValue = ONE_USDC.mul(1000);
 
-        const feeData = await getGasPriceAndFee(mainnetProvider, relayer.fees, totalValue, {
+        const feeData = await getGasPriceAndFee(mainnetProvider, relayer.fees, {
             gasStationKey: process.env.GAS_STATION_API_KEY,
         });
 
@@ -121,9 +121,11 @@ describe("Deposit Relayer", () => {
 
     it("filters out relayers when fees are unacceptable", async () => {
         const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
-            standardFee: relayer.fees.standardFee + 0.001,
-            minFee: relayer.fees.minFee.add(1),
+            standardFee: 0.00001,
+            minFee: relayer.fees.minFee.sub(1),
         });
+
+        console.log({ fees: relayers.map(relay => relay.fees) });
 
         expect(relayers.length).to.equal(0);
     });
@@ -168,7 +170,7 @@ describe("Deposit Relayer", () => {
             expect(true).to.equal(false);
         } catch (error) {
             expect(error.errors[0]).to.equal(
-                "Deposit failed with status code 400: Gas price lower than minimum accepted.",
+                "Deposit failed with status code 400: Fee lower than minimum accepted fee.",
             );
         }
     });
