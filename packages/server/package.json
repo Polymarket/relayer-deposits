@@ -6,9 +6,11 @@
   "scripts": {
     "start": "ts-node src/server",
     "dev": "ts-node-dev src/server",
-    "build": "",
+    "build": "tsc",
+    "clean": "rimraf ./build",
     "post-build": "yarn start",
-    "lint": "eslint --config ./.eslintrc.js src"
+    "lint": "eslint --config ./.eslintrc.js src",
+    "pm2-start": "yean clean && yarn build && pm2 start build/server.js"
   },
   "dependencies": {
     "@ethersproject/bignumber": "^5.1.0",
@@ -17,6 +19,7 @@
     "@ethersproject/wallet": "^5.1.0",
     "@koa/cors": "^3.1.0",
     "@polymarket/multi-endpoint-provider": "^0.0.3",
+    "@polymarket/relayer-deposits": "^0.1.0",
     "@types/koa": "^2.11.4",
     "@types/koa-bodyparser": "^4.3.1",
     "@types/koa-router": "^7.4.1",
@@ -26,6 +29,7 @@
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.4.0",
+    "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
