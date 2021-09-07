@@ -125,8 +125,6 @@ describe("Deposit Relayer", () => {
             minFee: relayer.fees.minFee.sub(1),
         });
 
-        console.log({ fees: relayers.map(relay => relay.fees) });
-
         expect(relayers.length).to.equal(0);
     });
 
