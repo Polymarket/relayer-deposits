@@ -109,7 +109,8 @@ Add those credentials to their respective place in the .env file. You'll want to
 Start the server:
 ```bash
 yarn
-yarn start
+chmod u+x start.sh
+./start.sh
 ```
 
 ## Running the auto fee swapper

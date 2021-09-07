@@ -54,7 +54,7 @@
     "prebuild": "yarn clean",
     "build:cjs": "tsc --project tsconfig.production.json",
     "build:esm": "tsc --project tsconfig.esm.json",
-    "build": "run-p build:*",
+    "build": "yarn clean && run-p build:*",
     "clean:cjs": "shx rm -rf ./lib",
     "clean:esm": "shx rm -rf ./lib.esm",
     "clean": "run-p clean:*",
