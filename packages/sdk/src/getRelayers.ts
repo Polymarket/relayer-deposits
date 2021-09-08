@@ -13,7 +13,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
     const relayInfo = await depositContract.getRelayersWithUrls();
 
     const relayInfoRequests = relayInfo.map(
-        (relayInfo: string) =>
+        (relayInfo: string): Promise<Relayer | null> =>
             new Promise(resolve => {
                 const [address, relayEndpoint] = defaultAbiCoder.decode(["address", "string"], relayInfo);
                 getHttpClient(relayEndpoint, RELAY_INFO_TIMEOUT)
@@ -34,7 +34,7 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
 
                         // check that relayer fees are acceptable
                         if (!hasFees || !areFeesAcceptable) {
-                            resolve({});
+                            resolve(null);
                         }
 
                         resolve({
@@ -46,14 +46,14 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
                     .catch((e: any) => {
                         console.log("Error fetching relay info");
                         console.log({ e });
-                        resolve({});
+                        resolve(null);
                     });
             }),
     );
 
-    const unFilteredRelayers = await Promise.all(relayInfoRequests);
+    const unFilteredRelayers: (Relayer | null)[] = await Promise.all(relayInfoRequests);
 
-    return unFilteredRelayers
-        .filter((relayer: any) => !!relayer.address)
-        .sort((a: any, b: any) => a.fee - b.fee) as Relayer[];
+    const filteredRelayers = unFilteredRelayers.filter((relayer: Relayer | null) => !!relayer) as Relayer[];
+
+    return filteredRelayers.sort((a: Relayer, b: Relayer) => a.fees.standardFee - b.fees.standardFee) as Relayer[];
 };

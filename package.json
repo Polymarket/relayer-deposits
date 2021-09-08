@@ -15,7 +15,8 @@
       "start:server": "yarn workspace @polymarket/deposit-relay-server start",
       "start": "yarn build:ts && yarn start:server",
       "heroku-postbuild": "echo Skip build on Heroku",
-      "server:pm2-start": "yarn workspace @polymarket/deposit-relay-server pm2-start"
+      "server:pm2-start": "yarn workspace @polymarket/deposit-relay-server pm2-start",
+      "test:sdk": "yarn workspace @polymarket/deposit-router test:sdk"
   },
   "heroku-run-build-script": true
 }

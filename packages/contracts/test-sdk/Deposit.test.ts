@@ -119,9 +119,18 @@ describe("Deposit Relayer", () => {
         expect(foundRelayer?.address).to.equal(relayer.address);
     });
 
-    it("filters out relayers when fees are unacceptable", async () => {
+    it("filters out relayers when standard fee is unacceptable", async () => {
         const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
             standardFee: 0.00001,
+            minFee: relayer.fees.minFee,
+        });
+
+        expect(relayers.length).to.equal(0);
+    });
+
+    it("filters out relayers when min fee is unacceptable", async () => {
+        const relayers = await getRelayers(ethers.provider, HARDHAT_NETWORK, {
+            standardFee: 0.1,
             minFee: relayer.fees.minFee.sub(1),
         });
 
