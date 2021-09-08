@@ -32,7 +32,7 @@ export const handleDeposit = async (ctx, next) => {
         from,
         depositRecipient,
         totalValue,
-        fee: userProvidedFee,
+        fee,
         validBefore,
         receiveNonce,
         chainId: requestedChainId,
@@ -41,7 +41,7 @@ export const handleDeposit = async (ctx, next) => {
 
     ctx.assert(chainId === requestedChainId, 400, `Requested deposit on chainId ${requestedChainId} but server only accepts deposits on ${chainId}`);
 
-    ctx.assert(BigNumber.from(totalValue).gt(userProvidedFee), 400, "Deposit amount must be greater than the fee");
+    ctx.assert(BigNumber.from(totalValue).gt(fee), 400, "Deposit amount must be greater than the fee");
 
     let signer: Signer;
     try {
@@ -68,11 +68,9 @@ export const handleDeposit = async (ctx, next) => {
     }
 
     // check gas price is fast to prevent slow gas price from slowing deposits
-    const { fee: calculatedFee } = await getFee(BigNumber.from(totalValue));
+    const { fee: calculatedFee } = await getFee();
 
-    // check that the fee is acceptable
-    const fee = calculatedFee.lt(userProvidedFee) ? calculatedFee : userProvidedFee;
-
+    // check that fee is acceptable
     const feeMin = calculatedFee.mul(90).div(100);
     ctx.assert(BigNumber.from(fee).gt(feeMin), 400, "Fee lower than minimum accepted fee.");
 

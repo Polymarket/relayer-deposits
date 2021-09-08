@@ -1294,15 +1294,6 @@
     "@ethersproject/providers" "^5.1.2"
     "@ethersproject/web" "^5.1.0"
 
-"@polymarket/relayer-deposits@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@polymarket/relayer-deposits/-/relayer-deposits-0.0.8.tgz#dbeb545baad19e1f3021a92636f5737b196a54ce"
-  integrity sha512-wfwfso2nSI5nkQmDd4wlyY6LYV+Ai2ZzWWgDg4/C4Iv6aFOIky1CvIfQJboQp0l1I06SWvp/eqJMrKzYFBmtpw==
-  dependencies:
-    "@polymarket/amm-maths" "^0.3.0"
-    "@tomfrench/chainlink-asset-converter" "^0.1.1"
-    axios "^0.21.1"
-
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@resolver-engine/core/-/core-0.3.3.tgz#590f77d85d45bc7ecc4e06c654f41345db6ca967"

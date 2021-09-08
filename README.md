@@ -144,14 +144,14 @@ Currently to test the sdk you must simultaneously run a hardhat mainnet fork and
 
 In the root of the repo:
 
+- run the hardhat mainnet fork
+
+    - `yarn run-fork`
+
 - start the server
 
     - `yarn start`
-
-
-- run the hardhat mainnet fork
-    - `yarn run-fork`
-
+    
 
 Then in packages/contracts:
 
