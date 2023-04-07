@@ -7,6 +7,7 @@ import { Relayer, RelayerFee } from "./types";
 import { getHttpClient } from "./utils/axios";
 import { RELAY_INFO_TIMEOUT } from "./constants";
 
+/*
 export const getRelayers = async (provider: Provider, chainId: number, maxFees?: RelayerFee): Promise<Relayer[]> => {
     const depositContract = getDepositContract(provider, chainId);
 
@@ -56,4 +57,15 @@ export const getRelayers = async (provider: Provider, chainId: number, maxFees?:
     const filteredRelayers = unFilteredRelayers.filter((relayer: Relayer | null) => !!relayer) as Relayer[];
 
     return filteredRelayers.sort((a: Relayer, b: Relayer) => a.fees.standardFee - b.fees.standardFee) as Relayer[];
+};
+
+*/
+
+export const getRelayers = async (provider: Provider, chainId: number, maxFees?: RelayerFee): Promise<Relayer[]> => {
+    const polymarketRelayer: Relayer = {
+        endpoint: "https://deposit-relayer.polymarket.io",
+        address: "0xdA85b2Cac8Da0D683232837ECdf71315FD6de74E",
+        fees: { standardFee: 0.1, minFee: BigNumber.from("0x2dc6c0") },
+    };
+    return [polymarketRelayer];
 };

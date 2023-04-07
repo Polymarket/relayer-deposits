@@ -1,6 +1,6 @@
 {
   "name": "@polymarket/relayer-deposits",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "A template for typescript packages",
   "author": "Sam Hatem <sam.hatem17@gmail.com>",
   "main": "lib/index.js",
@@ -14,6 +14,10 @@
     {
       "name": "Sam Hatem",
       "url": "https://github.com/samhatem"
+    },
+    {
+      "name": "Liam Kovatch",
+      "url": "https://github.com/l-kov"
     }
   ],
   "dependencies": {
